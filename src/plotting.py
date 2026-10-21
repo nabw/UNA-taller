@@ -253,22 +253,22 @@ def plot_synthetic_observations(
     t_obs: np.ndarray,
     I_clean: np.ndarray,
     I_gauss: np.ndarray,
-    I_poiss: np.ndarray
+    I_poiss: Optional[np.ndarray] = None
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
     Grafica la curva real de infectados junto con las observaciones sintéticas
-    perturbadas por ruido Gaussiano y Poisson.
+    perturbadas por ruido Gaussiano (y opcionalmente Poisson).
 
     Parámetros
     ----------
     t_obs : np.ndarray
         Vector 1D de tiempos discretos de muestreo (días).
     I_clean : np.ndarray
-        Vector 1D de infectados sin ruido (Ground Truth).
+        Vector 1D de infectados sin ruido (referencia continua).
     I_gauss : np.ndarray
         Vector 1D de observaciones con ruido Gaussiano proyectado.
-    I_poiss : np.ndarray
-        Vector 1D de observaciones con ruido Poisson discreto escalado.
+    I_poiss : np.ndarray, opcional
+        Vector 1D de observaciones con ruido Poisson discreto escalado (opcional).
 
     Retorna
     -------
@@ -285,7 +285,7 @@ def plot_synthetic_observations(
         color="black",
         linestyle="-",
         linewidth=2.2,
-        label="Ground Truth (Limpia)",
+        label="Referencia continua $I(t)$",
         zorder=3
     )
 
@@ -297,25 +297,26 @@ def plot_synthetic_observations(
         marker="o",
         s=40,
         alpha=0.75,
-        label="Ruido Gaussiano $\\mathcal{N}(0, \\sigma^2)$",
+        label="Observaciones con ruido Gaussiano",
         zorder=4
     )
 
-    # Observaciones con ruido Poisson
-    ax.scatter(
-        t_obs, I_poiss,
-        color="#d62728",
-        edgecolors="darkred",
-        marker="^",
-        s=45,
-        alpha=0.75,
-        label="Ruido Poisson (Casos / $N_{pop}$)",
-        zorder=5
-    )
+    # Observaciones con ruido Poisson (si se proporcionan)
+    if I_poiss is not None:
+        ax.scatter(
+            t_obs, I_poiss,
+            color="#d62728",
+            edgecolors="darkred",
+            marker="^",
+            s=45,
+            alpha=0.75,
+            label="Ruido Poisson (Casos / $N_{pop}$)",
+            zorder=5
+        )
 
-    ax.set_title("Datos Sintéticos de Prevalencia de Infectados $I(t)$", fontsize=12, pad=12)
+    ax.set_title("Datos sintéticos de prevalencia de infectados $I(t)$", fontsize=12, pad=12)
     ax.set_xlabel("Tiempo $t$ [días]", fontsize=11)
-    ax.set_ylabel("Proporción de Infectados $I(t)$", fontsize=11)
+    ax.set_ylabel("Proporción de infectados $I(t)$", fontsize=11)
     ax.grid(True, linestyle=":", alpha=0.6)
     ax.legend(frameon=True, facecolor="white", edgecolor="#ccc", fontsize=10)
 

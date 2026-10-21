@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "una_taller"
-version = "0.1.0"
-description = "Laboratorio: Discretización de Sistemas Dinámicos y Problemas Inversos en Ciencia de Datos"
+version = "0.2.0"
+description = "Taller: Discretización de Sistemas Dinámicos y Problemas Inversos en Ciencia de Datos"
 readme = "README.md"
 authors = [
     { name = "Universidad Nacional de Costa Rica", email = "contacto@una.ac.cr" }
@@ -21,7 +21,6 @@ dependencies = [
     "numpy>=1.24.0",
     "scipy>=1.10.0",
     "matplotlib>=3.7.0",
-    "streamlit>=1.25.0",
 ]
 
 [tool.setuptools.packages.find]

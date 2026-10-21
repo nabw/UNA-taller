@@ -1,9 +1,4 @@
-# Apéndice Teórico: Análisis de Estabilidad Lineal de Métodos de Integración Temporal
-
-> [!NOTE]
-> Este apéndice se ofrece como lectura complementaria y de profundización teórica para el taller. Su objetivo es formalizar el comportamiento de los esquemas numéricos de integración temporal más allá de la intuición geométrica o los ejemplos prácticos.
-
----
+# Apéndice Teórico: Análisis de Estabilidad Lineal y Métodos Implícitos
 
 ## 1. Introducción y la Ecuación de Prueba de Dahlquist
 
@@ -11,123 +6,86 @@ Al resolver numéricamente ecuaciones diferenciales ordinarias (EDO) del tipo:
 
 $$\dot{x} = f(t, x)$$
 
-nos interesa no solo la **consistencia** y la **convergencia** del método, sino fundamentalmente su **estabilidad lineal**. Para estudiar esto de manera canónica, Dahlquist propuso analizar el comportamiento de los esquemas numéricos aplicados a la ecuación lineal escalar de prueba:
+nos interesa no solo la consistencia y la convergencia del método, sino fundamentalmente su estabilidad lineal. Para estudiar esto de manera canónica, Dahlquist propuso analizar el comportamiento de los esquemas numéricos aplicados a la ecuación lineal escalar de prueba:
 
 $$\dot{x} = \lambda x$$
 
-donde $\lambda \in \mathbb{C}$ representa el autovalor (o la tasa linealizada) del sistema. En muchos problemas disipativos o de difusión, $\lambda = -C$ con $C > 0$, de modo que $\text{Re}(\lambda) < 0$. La solución analítica exacta es:
+donde $\lambda \in \mathbb{C}$ representa el autovalor del sistema. En problemas disipativos, $\lambda = -C$ con $C > 0$, de modo que $\text{Re}(\lambda) < 0$. La solución analítica exacta es:
 
 $$x(t) = x(0) e^{\lambda t}$$
 
-la cual decae exponencialmente hacia cero cuando $t \to \infty$ si $\text{Re}(\lambda) < 0$. Un método numérico es **estable** si la solución discreta $x_n$ permanece acotada a medida que avanzan los pasos temporales $n \to \infty$ con un paso de tiempo constante $\Delta t$.
+la cual decae exponencialmente hacia cero cuando $t \to \infty$ si $\text{Re}(\lambda) < 0$. Un método numérico es estable si la solución discreta $x_n$ permanece acotada a medida que avanzan los pasos temporales $n \to \infty$ con un paso de tiempo constante $\Delta t$.
 
 ---
 
-## 2. Factor de Amplificación $R(z)$ y Análisis de Métodos Clásicos
+## 2. Factor de Amplificación y Análisis de Estabilidad
 
-Al aplicar un método de un solo paso (como Runge-Kutta o esquemas de Euler) a la ecuación de prueba, la relación entre dos pasos consecutivos se puede escribir de la forma general:
+Al aplicar un método de un solo paso a la ecuación de prueba, la relación entre dos pasos consecutivos se escribe como:
 
 $$x_{n+1} = R(z) x_n$$
 
-donde se define la variable adimensional:
-
-$$z = \lambda \Delta t$$
-
-La función $R(z)$ se denomina **factor de amplificación** del método. La condición necesaria y suficiente de estabilidad lineal es que el módulo del factor de amplificación esté acotado por la unidad:
+donde $z = \lambda \Delta t$ y $R(z)$ es el factor de amplificación. La condición necesaria y suficiente de estabilidad lineal es:
 
 $$|R(z)| \le 1$$
 
-### 2.1. Método de Euler Explícito
-
-El esquema de Euler explícito discretiza la derivada temporal mediante diferencias hacia adelante:
-
-$$\frac{x_{n+1} - x_n}{\Delta t} = \lambda x_n \implies x_{n+1} = (1 + \lambda \Delta t) x_n$$
-
-Por lo tanto, el factor de amplificación es:
+### 2.1. Euler Explícito
+El esquema de Euler explícito conduce a:
 
 $$R(z) = 1 + z$$
 
-Para garantizar la estabilidad, exigimos $|1 + z| \le 1$. Si consideramos un problema puramente disipativo real donde $\lambda = -C$ ($C > 0$), entonces $z = -C \Delta t$ es un número real negativo. La condición de estabilidad se reduce a:
-
-$$|1 - C \Delta t| \le 1 \implies -1 \le 1 - C \Delta t \le 1 \implies 0 \le C \Delta t \le 2$$
-
-De aquí se deriva la conocida restricción estricta del paso de tiempo para métodos explícitos:
+Para un problema real disipativo con $\lambda = -C$ ($C > 0$), la condición de estabilidad $|1 - C \Delta t| \le 1$ impone la restricción estricta en el paso de tiempo:
 
 $$\Delta t \le \frac{2}{C}$$
 
-Si $\Delta t > \frac{2}{C}$, el factor de amplificación supera en valor absoluto a 1 ($|R(z)| > 1$), provocando que el error numérico crezca de manera exponencial y oscilatoria hasta divergir por completo.
-
-### 2.2. Método de Euler Implícito
-
-El esquema de Euler implícito evalúa el término derecho en el nuevo nivel temporal $n+1$:
-
-$$\frac{x_{n+1} - x_n}{\Delta t} = \lambda x_{n+1} \implies (1 - \lambda \Delta t) x_{n+1} = x_n$$
-
-Despejando $x_{n+1}$ obtenemos el factor de amplificación:
+### 2.2. Euler Implícito
+El esquema de Euler implícito evalúa el término derecho en el nuevo nivel temporal $n+1$, obteniendo el factor de amplificación:
 
 $$R(z) = \frac{1}{1 - z}$$
 
-Queremos analizar la condición de estabilidad para cualquier $\lambda$ con $\text{Re}(\lambda) \le 0$ (es decir, $\text{Re}(z) \le 0$). Evaluamos el módulo al cuadrado:
-
-$$|R(z)|^2 = \left| \frac{1}{1 - z} \right|^2 = \frac{1}{(1 - x)^2 + y^2}$$
-
-donde $z = x + iy$ con $x = \text{Re}(z) \le 0$. Como $x \le 0$, tenemos que $(1 - x)^2 \ge 1$, por lo tanto:
-
-$$|R(z)|^2 = \frac{1}{(1 - x)^2 + y^2} \le 1$$
-
-Esta propiedad notable, donde el método es estable para **cualquier** tamaño de paso $\Delta t$ siempre que el sistema sea disipativo ($\text{Re}(z) \le 0$), se conoce como **A-estabilidad**. Los métodos A-estables son ideales para resolver sistemas rígidos (*stiff systems*), donde los procesos rápidos imponen restricciones prohibitivas de paso de tiempo a los métodos explícitos.
+Para cualquier $\lambda$ con $\text{Re}(\lambda) \le 0$, se cumple que $|R(z)| \le 1$ sin restricciones sobre $\Delta t$. Esta propiedad se denomina A-estabilidad, haciendo que el método sea adecuado para sistemas rígidos.
 
 ---
 
-## 3. Esquemas IMEX (Implicit-Explicit)
+## 3. Deducción del Euler Implícito para el Modelo SIR
 
-En muchas aplicaciones científicas complejas (por ejemplo, dinámica de fluidos geofísicos, reacciones químicas con múltiples escalas de tiempo, o modelos climáticos), el lado derecho de la ecuación diferencial contiene procesos físicos de naturaleza muy diversa:
+En los modelos epidemiológicos no lineales como el sistema SIR, la aplicación de esquemas implícitos requiere resolver sistemas algebraicos no lineales en cada paso temporal. Consideremos la discretización mediante Euler implícito para la ecuación de los infectados $I(t)$:
 
-$$\dot{x} = f_{\text{exp}}(x) + f_{\text{imp}}(x)$$
+$$\frac{I_{n+1} - I_n}{\Delta t} = \beta S_{n+1} I_{n+1} - \gamma I_{n+1}$$
 
-- $f_{\text{exp}}(x)$: Términos no lineales o advectivos suaves, cuya limitación de paso de tiempo es moderada. Tratarlos de forma implícita requeriría la inversión costosa de sistemas no lineales grandes en cada paso.
-- $f_{\text{imp}}(x)$: Términos lineales rígidos, disipativos o difusivos (por ejemplo, operadores de difusión espacial o términos de amortiguamiento rápido) que imponen restricciones severas de estabilidad mediante esquemas explícitos.
+En una formulación totalmente implícita estándar, las variables del nuevo paso temporal están acopladas. Para ilustrar la estructura algebraica sin perder generalidad, supongamos que aproximamos la no linealidad del término de infección utilizando el estado susceptible acoplado o una linealización implícita local donde $S_{n+1}$ se aproxima o se mantiene consistente con la conservación de masa. 
 
-Los esquemas **IMEX** (*Implicit-Explicit*) combinan lo mejor de ambos mundos mediante una descomposición aditiva. Aplicando, por ejemplo, Euler explícito para los términos no lineales y Euler implícito para los términos rígidos:
+Sustituyendo la relación de conservación de susceptibles $S_{n+1} = S_n - (I_{n+1} - I_n)$ o agrupando los términos no lineales del tipo $\beta I_{n+1}^2$, la ecuación discreta se reorganiza en la forma de una ecuación cuadrática general para la incógnita $I_{n+1}$:
 
-$$\frac{x_{n+1} - x_n}{\Delta t} = f_{\text{exp}}(x_n) + f_{\text{imp}}(x_{n+1})$$
+$$A \, I_{n+1}^2 + B \, I_{n+1} - I_n = 0$$
 
-Esto permite mantener una alta eficiencia computacional (evitando resolver sistemas no lineales completos) al tiempo que se neutraliza la inestabilidad numérica inducida por los componentes más rígidos del modelo.
+donde los coeficientes $A$ y $B$ dependen de los parámetros del modelo ($\beta$, $\gamma$), el paso temporal $\Delta t$ y el estado previo $I_n$ (así como $S_n$). 
+
+### Selección de la Raíz Física
+
+Aplicando la fórmula general para resolver la ecuación cuadrática, obtenemos dos posibles raíces matemáticas:
+
+$$I_{n+1} = \frac{-B \pm \sqrt{B^2 + 4 A I_n}}{2 A}$$
+
+Dado que $I_{n+1}$ representa una proporción de individuos infectados, debe ser una cantidad real y no negativa. Analizando los signos de los coeficientes derivados de la dinámica epidemiológica (donde $A > 0$ y el término bajo la raíz garantiza existencia real para pasos de tiempo razonables), la rama con el signo negativo produce valores negativos o incongruentes, mientras que la **única raíz física admisible** es la que selecciona el signo positivo:
+
+$$I_{n+1} = \frac{-B + \sqrt{B^2 + 4 A I_n}}{2 A}$$
+
+Este detalle algebraico demuestra por qué la resolución de esquemas implícitos requiere un tratamiento analítico cuidadoso que se relega a este apéndice para mantener la claridad y agilidad en el cuaderno práctico principal.
 
 ---
 
-## 4. Conexión con la Ecuación Logística y el Origen de las Oscilaciones
+## 4. Conexión con la Ecuación Logística y Oscilaciones Espurias
 
-Para ilustrar cómo la teoría lineal se manifiesta en modelos no lineales reales, consideremos la **ecuación logística adimensionalizada**:
+Consideremos la ecuación logística adimensionalizada:
 
 $$\dot{x} = C x (1 - x)$$
 
-donde $C > 0$ es la tasa intrínseca de crecimiento. Este sistema posee dos puntos de equilibrio (atractores/repulsores):
-1. $x^* = 0$ (inestable)
-2. $x^* = 1$ (estable)
-
-Supongamos que el sistema se encuentra cerca del estado estacionario estable $x^* = 1$. Definimos una pequeña perturbación lineal u en torno al atractor:
-
-$$x(t) = 1 + u(t) \quad \text{con } |u| \ll 1$$
-
-Sustituyendo en la ecuación logística:
-
-$$\frac{d}{dt}(1 + u) = C (1 + u) (1 - (1 + u)) \implies \dot{u} = C (1 + u) (-u) = -C u - C u^2$$
-
-Ignorando los términos de orden superior $\mathcal{O}(u^2)$, obtenemos la ecuación linealizada de perturbación:
+Linealizando en torno al estado estacionario estable $x^* = 1$ mediante la perturbación $x(t) = 1 + u(t)$ con $|u| \ll 1$, se obtiene la ecuación linealizada de error:
 
 $$\dot{u} = -C u$$
 
-Esta es exactamente la ecuación de prueba de Dahlquist con $\lambda = -C$. 
+Si se integra esta perturbación mediante Euler explícito con un paso de tiempo que supere la cota de estabilidad pero sin divergencia inmediata, el factor de amplificación negativo $R = 1 - C \Delta t < -1$ multiplica la perturbación alternando su signo en cada paso:
 
-### Origen Numérico de las Oscilaciones Espurias
+$$u_{n+1} = R \, u_n$$
 
-Si integramos esta perturbación mediante **Euler explícito** con un paso de tiempo $\Delta t$ que viole ligeramente la cota de estabilidad pero sin divergencia catastrófica inmediata (es decir, $2/C < \Delta t < 2.78$), el factor de amplificación evaluado es:
-
-$$R(-C \Delta t) = 1 - C \Delta t$$
-
-Si $C \Delta t = 2.5$, entonces $R = 1 - 2.5 = -1.5$. Su valor absoluto es $|R| = 1.5 > 1$ (inestable), pero al ser negativo, cada paso multiplica la perturbación por $-1.5$. Esto genera una oscilación de signo alternado (creciente en magnitud) alrededor del estado estacionario:
-
-$$u_{n+1} = -1.5 \, u_n \implies u_n = (-1.5)^n u_0$$
-
-Este análisis demuestra que **las oscilaciones numéricas observadas al usar un $\Delta t$ excesivamente grande no provienen de la física subyacente del modelo**, sino de un artefacto matemático del factor de amplificación del método explícito cuando cruza el semiplano negativo hacia la región de inestabilidad espiral/creciente.
+Esto genera oscilaciones numéricas espurias crecientes que no corresponden a la dinámica biológica real del sistema, evidenciando los límites de los métodos explícitos.

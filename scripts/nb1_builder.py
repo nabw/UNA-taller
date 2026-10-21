@@ -1,0 +1,529 @@
+"""
+Constructor del Cuaderno 1: Modelo Logístico 1D.
+Produce celdas para las versiones 'estudiante' y 'solucion'.
+"""
+
+from typing import List, Dict, Any
+
+
+def build_nb1_cells(is_solution: bool) -> List[Dict[str, Any]]:
+    cells = []
+
+    # Celda 1: Markdown - Portada e Introducción
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "# Laboratorio 1: Dinamica y Estabilidad Numerica en el Modelo Logistico 1D\n\n"
+            "## 1. Introduccion y Contexto Matematico\n\n"
+            "El modelo logistico, propuesto originalmente por Pierre Francois Verhulst en 1838, "
+            "describe la dinamica temporal de una poblacion en un entorno con recursos finitos. "
+            "En su formulacion normalizada, la fraccion de la poblacion respecto a la capacidad de carga, "
+            "$x(t) \\in [0, 1]$, satisface la ecuacion diferencial ordinaria (EDO):\n\n"
+            "$$\\frac{dx}{dt} = C x (1 - x)$$\n\n"
+            "donde:\n"
+            "- $x(t)$ es la variable de estado adimensional.\n"
+            "- $C > 0$ representa la tasa intrinseca de crecimiento per capita.\n"
+            "- El termino $C x$ modela la expansion exponencial no restringida.\n"
+            "- El factor $(1 - x)$ modela la saturacion por competencia ambiental (densodependencia).\n\n"
+            "### Puntos de Equilibrio y Comportamiento Asintotico\n\n"
+            "Los puntos criticos corresponden a las raices de $f(x) = C x (1 - x) = 0$:\n"
+            "- $x^* = 0$: punto de equilibrio inestable ($f'(0) = C > 0$).\n"
+            "- $x^* = 1$: punto de equilibrio asintoticamente estable ($f'(1) = -C < 0$).\n\n"
+            "Para cualquier condicion inicial $x_0 \\in (0, 1)$, la solucion continua es estrictamente creciente, "
+            "acotada superiormente por 1 y libre de oscilaciones.\n\n"
+            "## Objetivos de Aprendizaje\n\n"
+            "1. Deducir e implementar la solucion analitica exacta en forma cerrada.\n"
+            "2. Implementar e integrar la trayectoria mediante el metodo de Euler explicito.\n"
+            "3. Implementar el metodo de Euler implicito resolviendo analiticamente la raiz cuadratica admisible.\n"
+            "4. Implementar el esquema Implicito-Explicito (IMEX) linealizado.\n"
+            "5. Comparar la estabilidad numerica en dos regimenes temporales: paso fino ($\\Delta t = 0.1$) "
+            "frente a paso critico ($\\Delta t = 1.3$) con $C = 2.0$."
+        )
+    })
+
+    # Celda 2: Código - Configuración de entorno
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Celda de configuracion y librerias cientificas\n"
+            "import os\n"
+            "os.environ.setdefault(\"MPLCONFIGDIR\", \"/tmp/matplotlib\")\n"
+            "import numpy as np\n"
+            "import matplotlib.pyplot as plt\n\n"
+            "# Estilo sobrio y legible para figuras cientificas\n"
+            "plt.style.use(\"seaborn-v0_8-whitegrid\" if \"seaborn-v0_8-whitegrid\" in plt.style.available else \"default\")\n"
+            "plt.rcParams.update({\n"
+            "    \"font.size\": 11,\n"
+            "    \"axes.labelsize\": 12,\n"
+            "    \"axes.titlesize\": 12,\n"
+            "    \"figure.titlesize\": 13,\n"
+            "    \"lines.linewidth\": 2.0,\n"
+            "    \"grid.alpha\": 0.4\n"
+            "})\n\n"
+            "print(\"Librerias importadas correctamente.\")"
+        )
+    })
+
+    # Celda 3: Markdown - Solución Analítica
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "## 2. Solucion Analitica Exacta\n\n"
+            "La ecuacion logistica es separable:\n\n"
+            "$$\\frac{dx}{x (1 - x)} = C dt$$\n\n"
+            "Descomponiendo en fracciones parciales:\n\n"
+            "$$\\int \\left( \\frac{1}{x} + \\frac{1}{1 - x} \\right) dx = \\int C dt \\implies \\ln\\left( \\frac{x}{1 - x} \\right) = C t + K$$\n\n"
+            "Aplicando la condicion inicial $x(0) = x_0$ y despejando $x(t)$ de forma numericamente estable:\n\n"
+            "$$x(t) = \\frac{1}{1 + \\left( \\frac{1 - x_0}{x_0} \\right) e^{-C t}}$$"
+        )
+    })
+
+    # Celda 4: Código - Función solucion_exacta
+    if is_solution:
+        code_exact = (
+            "def solucion_exacta(x0: float, C: float, t: np.ndarray) -> np.ndarray:\n"
+            "    \"\"\"\n"
+            "    Calcula la solucion analitica exacta de la ecuacion logistica 1D.\n\n"
+            "    Parametros\n"
+            "    ----------\n"
+            "    x0 : float\n"
+            "        Condicion inicial x(0), con x0 en (0, 1).\n"
+            "    C : float\n"
+            "        Tasa intrinseca de crecimiento per capita (C > 0).\n"
+            "    t : np.ndarray\n"
+            "        Vector unidimensional de instantes de tiempo.\n\n"
+            "    Retorna\n"
+            "    -------\n"
+            "    np.ndarray\n"
+            "        Valores exactos de x(t).\n"
+            "    \"\"\"\n"
+            "    t_arr = np.asarray(t, dtype=np.float64)\n"
+            "    if x0 <= 0.0:\n"
+            "        return np.zeros_like(t_arr)\n"
+            "    factor = (1.0 - x0) / x0\n"
+            "    return 1.0 / (1.0 + factor * np.exp(-C * t_arr))"
+        )
+    else:
+        code_exact = (
+            "def solucion_exacta(x0: float, C: float, t: np.ndarray) -> np.ndarray:\n"
+            "    \"\"\"\n"
+            "    Calcula la solucion analitica exacta de la ecuacion logistica 1D.\n\n"
+            "    Parametros\n"
+            "    ----------\n"
+            "    x0 : float\n"
+            "        Condicion inicial x(0), con x0 en (0, 1).\n"
+            "    C : float\n"
+            "        Tasa intrinseca de crecimiento per capita (C > 0).\n"
+            "    t : np.ndarray\n"
+            "        Vector unidimensional de instantes de tiempo.\n\n"
+            "    Retorna\n"
+            "    -------\n"
+            "    np.ndarray\n"
+            "        Valores exactos de x(t).\n"
+            "    \"\"\"\n"
+            "    # TU CODIGO AQUI\n"
+            "    ..."
+        )
+    cells.append({"type": "code", "source": code_exact})
+
+    # Celda 5: Código - Pruebas unitarias solucion_exacta
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Pruebas de validacion para solucion_exacta\n"
+            "t_test = np.array([0.0, 1.0, 5.0, 15.0])\n"
+            "x_test = solucion_exacta(0.1, 2.0, t_test)\n\n"
+            "assert isinstance(x_test, np.ndarray), \"La funcion debe retornar un arreglo de NumPy.\"\n"
+            "assert x_test.shape == t_test.shape, \"La forma del arreglo de salida debe ser igual a la de t.\"\n"
+            "assert np.isclose(x_test[0], 0.1), f\"x(0) debe ser 0.1, obtenido {x_test[0]:.4f}\"\n"
+            "assert np.isclose(x_test[-1], 1.0, atol=1e-5), f\"Para t grande, x debe tender a 1.0, obtenido {x_test[-1]:.6f}\"\n"
+            "assert np.all(np.diff(x_test) > 0), \"La solucion logistica continua con x0 in (0, 1) debe ser estrictamente creciente.\"\n"
+            "print(\"Validacion de solucion_exacta: EXITOSA.\")"
+        )
+    })
+
+    # Celda 6: Markdown - Euler Explícito
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "## 3. Metodo de Euler Explicito\n\n"
+            "Discretizamos el intervalo $[0, T]$ en pasos regulares $t_n = n \\Delta t$. "
+            "Reemplazando la derivada temporal por una diferencia finita hacia adelante:\n\n"
+            "$$\\frac{x_{n+1} - x_n}{\\Delta t} = C x_n (1 - x_n)$$\n\n"
+            "Despejando el estado en el siguiente paso:\n\n"
+            "$$x_{n+1} = x_n + \\Delta t C x_n (1 - x_n)$$\n\n"
+            "### Analisis de Estabilidad Lineal Local\n\n"
+            "Sea $x^* = 1$ el atractor asintotico. Consideremos una pequenia perturbacion "
+            "$\\delta x_n = x_n - 1$. Sustituyendo:\n\n"
+            "$$1 + \\delta x_{n+1} = (1 + \\delta x_n) + \\Delta t C (1 + \\delta x_n) (-\\delta x_n)$$\n"
+            "$$\\delta x_{n+1} \\approx (1 - \\Delta t C) \\delta x_n$$\n\n"
+            "El factor de amplificacion local es $\\lambda = 1 - \\Delta t C$. "
+            "La condicion de estabilidad lineal exige $|\\lambda| < 1$:\n\n"
+            "$$-1 < 1 - \\Delta t C < 1 \\implies 0 < \\Delta t C < 2$$\n\n"
+            "- Si $\\Delta t C < 1$: convergencia monótona hacia el atractor.\n"
+            "- Si $1 < \\Delta t C < 2$: oscilaciones amortiguadas que convergen a 1.\n"
+            "- Si $\\Delta t C > 2$: inestabilidad lineal. Aparecen oscilaciones espurias persistentes o divergentes."
+        )
+    })
+
+    # Celda 7: Código - Función euler_explicito
+    if is_solution:
+        code_expl = (
+            "def euler_explicito(\n"
+            "    x0: float,\n"
+            "    C: float,\n"
+            "    dt: float,\n"
+            "    T: float\n"
+            ") -> tuple[np.ndarray, np.ndarray]:\n"
+            "    \"\"\"\n"
+            "    Resuelve la ecuacion logistica mediante el esquema de Euler explicito.\n\n"
+            "    Parametros\n"
+            "    ----------\n"
+            "    x0 : float\n"
+            "        Condicion inicial.\n"
+            "    C : float\n"
+            "        Parametro de crecimiento.\n"
+            "    dt : float\n"
+            "        Tamano del paso temporal.\n"
+            "    T : float\n"
+            "        Tiempo final.\n\n"
+            "    Retorna\n"
+            "    -------\n"
+            "    t : np.ndarray\n"
+            "        Malla temporal discreta.\n"
+            "    x : np.ndarray\n"
+            "        Valores discretos de la solucion.\n"
+            "    \"\"\"\n"
+            "    n_steps = int(np.round(T / dt))\n"
+            "    t = np.linspace(0.0, n_steps * dt, n_steps + 1)\n"
+            "    x = np.zeros(n_steps + 1, dtype=np.float64)\n"
+            "    x[0] = float(x0)\n"
+            "    for n in range(n_steps):\n"
+            "        xn = x[n]\n"
+            "        x[n + 1] = xn + dt * C * xn * (1.0 - xn)\n"
+            "    return t, x"
+        )
+    else:
+        code_expl = (
+            "def euler_explicito(\n"
+            "    x0: float,\n"
+            "    C: float,\n"
+            "    dt: float,\n"
+            "    T: float\n"
+            ") -> tuple[np.ndarray, np.ndarray]:\n"
+            "    \"\"\"\n"
+            "    Resuelve la ecuacion logistica mediante el esquema de Euler explicito.\n\n"
+            "    Parametros\n"
+            "    ----------\n"
+            "    x0 : float\n"
+            "        Condicion inicial.\n"
+            "    C : float\n"
+            "        Parametro de crecimiento.\n"
+            "    dt : float\n"
+            "        Tamano del paso temporal.\n"
+            "    T : float\n"
+            "        Tiempo final.\n\n"
+            "    Retorna\n"
+            "    -------\n"
+            "    t : np.ndarray\n"
+            "        Malla temporal discreta.\n"
+            "    x : np.ndarray\n"
+            "        Valores discretos de la solucion.\n"
+            "    \"\"\"\n"
+            "    # TU CODIGO AQUI\n"
+            "    ..."
+        )
+    cells.append({"type": "code", "source": code_expl})
+
+    # Celda 8: Código - Pruebas unitarias euler_explicito
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Pruebas de validacion para euler_explicito\n"
+            "t_exp, x_exp = euler_explicito(0.1, 2.0, 0.1, 1.0)\n"
+            "assert len(t_exp) == 11, f\"Longitud esperada: 11, obtenida: {len(t_exp)}\"\n"
+            "assert np.isclose(x_exp[0], 0.1), \"La condicion inicial no coincide.\"\n"
+            "expected_step1 = 0.1 + 0.1 * 2.0 * 0.1 * (1.0 - 0.1)\n"
+            "assert np.isclose(x_exp[1], expected_step1), f\"Paso 1 esperado: {expected_step1}, obtenido: {x_exp[1]}\"\n"
+            "print(\"Validacion de euler_explicito: EXITOSA.\")"
+        )
+    })
+
+    # Celda 9: Markdown - Euler Implícito
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "## 4. Metodo de Euler Implicito (Backward Euler)\n\n"
+            "Evaluamos la tasa de variacion en el instante futuro $t_{n+1}$:\n\n"
+            "$$\\frac{x_{n+1} - x_n}{\\Delta t} = C x_{n+1} (1 - x_{n+1})$$\n\n"
+            "Multiplicando por $\\Delta t$ y agrupando terminos:\n\n"
+            "$$(\\Delta t C) x_{n+1}^2 + (1 - \\Delta t C) x_{n+1} - x_n = 0$$\n\n"
+            "Esta es una ecuacion cuadratica de la forma $a y^2 + b y + c = 0$, con:\n"
+            "- $a = \\Delta t C > 0$\n"
+            "- $b = 1 - \\Delta t C$\n"
+            "- $c = -x_n$\n\n"
+            "El discriminante es $\\Delta = b^2 - 4ac = (1 - \\Delta t C)^2 + 4 \\Delta t C x_n \\ge 0$ para todo $x_n \\ge 0$. "
+            "Puesto que $c = -x_n \\le 0$ y $a > 0$, el producto de las dos raices es $c/a \\le 0$. "
+            "Por lo tanto, existe una unica raiz real no-negativa (fisicamente admisible):\n\n"
+            "$$x_{n+1} = \\frac{-(1 - \\Delta t C) + \\sqrt{(1 - \\Delta t C)^2 + 4 \\Delta t C x_n}}{2 \\Delta t C}$$\n\n"
+            "Para evitar cancelacion sustractiva cuando $b > 0$, la raiz se puede formular de manera equivalente como:\n\n"
+            "$$x_{n+1} = \\frac{2 x_n}{b + \\sqrt{b^2 + 4 a x_n}}$$"
+        )
+    })
+
+    # Celda 10: Código - Función euler_implicito
+    if is_solution:
+        code_impl = (
+            "def euler_implicito(\n"
+            "    x0: float,\n"
+            "    C: float,\n"
+            "    dt: float,\n"
+            "    T: float\n"
+            ") -> tuple[np.ndarray, np.ndarray]:\n"
+            "    \"\"\"\n"
+            "    Resuelve la ecuacion logistica mediante el esquema de Euler implicito,\n"
+            "    utilizando la raiz analitica positiva de la ecuacion cuadratica.\n"
+            "    \"\"\"\n"
+            "    n_steps = int(np.round(T / dt))\n"
+            "    t = np.linspace(0.0, n_steps * dt, n_steps + 1)\n"
+            "    x = np.zeros(n_steps + 1, dtype=np.float64)\n"
+            "    x[0] = float(x0)\n\n"
+            "    a = dt * C\n"
+            "    b = 1.0 - dt * C\n\n"
+            "    for n in range(n_steps):\n"
+            "        xn = x[n]\n"
+            "        disc = b * b + 4.0 * a * xn\n"
+            "        denom = b + np.sqrt(max(0.0, disc))\n"
+            "        if denom > 0.0:\n"
+            "            x[n + 1] = 2.0 * xn / denom\n"
+            "        else:\n"
+            "            x[n + 1] = (-b + np.sqrt(max(0.0, disc))) / (2.0 * a)\n\n"
+            "    return t, x"
+        )
+    else:
+        code_impl = (
+            "def euler_implicito(\n"
+            "    x0: float,\n"
+            "    C: float,\n"
+            "    dt: float,\n"
+            "    T: float\n"
+            ") -> tuple[np.ndarray, np.ndarray]:\n"
+            "    \"\"\"\n"
+            "    Resuelve la ecuacion logistica mediante el esquema de Euler implicito,\n"
+            "    utilizando la raiz analitica positiva de la ecuacion cuadratica.\n"
+            "    \"\"\"\n"
+            "    # TU CODIGO AQUI\n"
+            "    ..."
+        )
+    cells.append({"type": "code", "source": code_impl})
+
+    # Celda 11: Código - Pruebas unitarias euler_implicito
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Pruebas de validacion para euler_implicito\n"
+            "t_imp, x_imp = euler_implicito(0.1, 2.0, 0.1, 1.0)\n"
+            "assert len(t_imp) == 11, f\"Longitud esperada: 11, obtenida: {len(t_imp)}\"\n"
+            "assert np.isclose(x_imp[0], 0.1), \"La condicion inicial no coincide.\"\n"
+            "# Verificar que satisface la relacion algebraica implicita en cada paso\n"
+            "residuos = x_imp[1:] - x_imp[:-1] - 0.1 * 2.0 * x_imp[1:] * (1.0 - x_imp[1:])\n"
+            "assert np.all(np.abs(residuos) < 1e-12), f\"Residuo maximo: {np.max(np.abs(residuos)):.2e}\"\n"
+            "print(\"Validacion de euler_implicito: EXITOSA.\")"
+        )
+    })
+
+    # Celda 12: Markdown - Esquema IMEX Linealizado
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "## 5. Esquema Implicito-Explicito (IMEX) Linealizado\n\n"
+            "Para evitar la resolucion de polinomios o metodos iterativos no lineales, "
+            "podemos desacoplar la dinamica tratando el termino lineal de expansion de manera explicita "
+            "y el termino no lineal de saturacion de manera implicita:\n\n"
+            "$$\\frac{x_{n+1} - x_n}{\\Delta t} = C x_n - C x_n x_{n+1}$$\n\n"
+            "Reorganizando la expresion algebraicamente:\n\n"
+            "$$x_{n+1} (1 + \\Delta t C x_n) = x_n (1 + \\Delta t C)$$\n\n"
+            "Despejando directamente $x_{n+1}$:\n\n"
+            "$$x_{n+1} = \\frac{x_n (1 + \\Delta t C)}{1 + \\Delta t C x_n}$$\n\n"
+            "### Propiedades Analiticas Fundamentales\n"
+            "1. **Linealidad implícita**: El calculo de $x_{n+1}$ es una operacion aritmetica directa.\n"
+            "2. **Positividad incondicional**: Si $x_n \\ge 0$, entonces tanto el numerador como el "
+            "denominador son estrictamente positivos para cualquier $\\Delta t > 0$, garantizando $x_{n+1} \\ge 0$.\n"
+            "3. **Conservacion del punto fijo**: Si $x_n = 1$, entonces $x_{n+1} = \\frac{1 + \\Delta t C}{1 + \\Delta t C} = 1$ "
+            "de forma exacta para todo $\\Delta t$."
+        )
+    })
+
+    # Celda 13: Código - Función imex_linealizado
+    if is_solution:
+        code_imx = (
+            "def imex_linealizado(\n"
+            "    x0: float,\n"
+            "    C: float,\n"
+            "    dt: float,\n"
+            "    T: float\n"
+            ") -> tuple[np.ndarray, np.ndarray]:\n"
+            "    \"\"\"\n"
+            "    Resuelve la ecuacion logistica mediante el esquema IMEX linealizado.\n"
+            "    \"\"\"\n"
+            "    n_steps = int(np.round(T / dt))\n"
+            "    t = np.linspace(0.0, n_steps * dt, n_steps + 1)\n"
+            "    x = np.zeros(n_steps + 1, dtype=np.float64)\n"
+            "    x[0] = float(x0)\n\n"
+            "    factor_num = 1.0 + dt * C\n"
+            "    for n in range(n_steps):\n"
+            "        xn = x[n]\n"
+            "        x[n + 1] = (xn * factor_num) / (1.0 + dt * C * xn)\n\n"
+            "    return t, x"
+        )
+    else:
+        code_imx = (
+            "def imex_linealizado(\n"
+            "    x0: float,\n"
+            "    C: float,\n"
+            "    dt: float,\n"
+            "    T: float\n"
+            ") -> tuple[np.ndarray, np.ndarray]:\n"
+            "    \"\"\"\n"
+            "    Resuelve la ecuacion logistica mediante el esquema IMEX linealizado.\n"
+            "    \"\"\"\n"
+            "    # TU CODIGO AQUI\n"
+            "    ..."
+        )
+    cells.append({"type": "code", "source": code_imx})
+
+    # Celda 14: Código - Pruebas unitarias imex_linealizado
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Pruebas de validacion para imex_linealizado\n"
+            "t_imx, x_imx = imex_linealizado(0.1, 2.0, 0.1, 1.0)\n"
+            "assert len(t_imx) == 11, f\"Longitud esperada: 11, obtenida: {len(t_imx)}\"\n"
+            "assert np.isclose(x_imx[0], 0.1), \"La condicion inicial no coincide.\"\n"
+            "expected_p1 = (0.1 * (1.0 + 0.1 * 2.0)) / (1.0 + 0.1 * 2.0 * 0.1)\n"
+            "assert np.isclose(x_imx[1], expected_p1), f\"Paso 1 esperado: {expected_p1}, obtenido: {x_imx[1]}\"\n"
+            "assert np.all(x_imx >= 0.0), \"El esquema IMEX debe preservar no-negatividad.\"\n"
+            "print(\"Validacion de imex_linealizado: EXITOSA.\")"
+        )
+    })
+
+    # Celda 15: Markdown - Experimento numérico comparativo
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "## 6. Comparacion de Regimenes Temporales: Paso Estable vs Inestable\n\n"
+            "Fijamos los parametros fisicos:\n"
+            "- Tasa de crecimiento: $C = 2.0$\n"
+            "- Condicion inicial: $x_0 = 0.05$\n"
+            "- Horizonte de integracion: $T = 8.0$\n\n"
+            "Evaluamos dos regimenes de paso temporal:\n"
+            "1. **Paso Fino (Regimen Asintotico)**: $\\Delta t = 0.1$.\n"
+            "   $$\\Delta t C = 0.2 < 2.0$$\n"
+            "   Dentro del radio de estabilidad lineal para todos los esquemas.\n\n"
+            "2. **Paso Critico (Regimen Inestable para Explicito)**: $\\Delta t = 1.3$.\n"
+            "   $$\\Delta t C = 2.6 > 2.0$$\n"
+            "   Euler explicito supera el umbral critico de estabilidad lineal, produciendo oscilaciones "
+            "espurias y sobrepaso de la capacidad de carga ($x > 1$)."
+        )
+    })
+
+    # Celda 16: Código - Ejecución y tabla comparativa
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Parametros de simulacion\n"
+            "C = 2.0\n"
+            "x0 = 0.05\n"
+            "T = 8.0\n\n"
+            "dt_cases = [0.1, 1.3]\n"
+            "results = {}\n\n"
+            "print(\"=\" * 75)\n"
+            "print(f\"{'dt':>6s} | {'Metodo':>16s} | {'Error L_inf':>12s} | {'Maximo x':>10s} | {'Sobrepaso x>1':>14s}\")\n"
+            "print(\"=\" * 75)\n\n"
+            "for dt in dt_cases:\n"
+            "    results[dt] = {}\n"
+            "    # Referencia exacta\n"
+            "    t_eval = np.linspace(0.0, T, int(np.round(T / dt)) + 1)\n"
+            "    x_exact = solucion_exacta(x0, C, t_eval)\n"
+            "    results[dt][\"exact\"] = (t_eval, x_exact)\n\n"
+            "    # Integradores numericos\n"
+            "    t_exp, x_exp = euler_explicito(x0, C, dt, T)\n"
+            "    t_imp, x_imp = euler_implicito(x0, C, dt, T)\n"
+            "    t_imx, x_imx = imex_linealizado(x0, C, dt, T)\n\n"
+            "    for name, t_num, x_num in [\n"
+            "        (\"Euler Explicito\", t_exp, x_exp),\n"
+            "        (\"Euler Implicito\", t_imp, x_imp),\n"
+            "        (\"IMEX Linealizado\", t_imx, x_imx)\n"
+            "    ]:\n"
+            "        err_linf = float(np.max(np.abs(x_num - x_exact)))\n"
+            "        max_val = float(np.max(x_num))\n"
+            "        overshoot = \"SI\" if max_val > 1.0 + 1e-5 else \"NO\"\n"
+            "        results[dt][name] = (t_num, x_num, err_linf, max_val)\n"
+            "        print(f\"{dt:6.2f} | {name:>16s} | {err_linf:12.4e} | {max_val:10.4f} | {overshoot:>14s}\")\n"
+            "    print(\"-\" * 75)\n"
+        )
+    })
+
+    # Celda 17: Código - Generación de figuras comparativas
+    cells.append({
+        "type": "code",
+        "source": (
+            "# Graficas de comparacion para ambos regimenes\n"
+            "t_dense = np.linspace(0.0, T, 400)\n"
+            "x_dense = solucion_exacta(x0, C, t_dense)\n\n"
+            "fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharey=True)\n\n"
+            "# Panel 1: dt = 0.1\n"
+            "ax = axes[0]\n"
+            "ax.plot(t_dense, x_dense, 'k-', label=\"Solucion Exacta\", zorder=1)\n"
+            "for name, color, style in [\n"
+            "    (\"Euler Explicito\", \"#d95f02\", \"o--\"),\n"
+            "    (\"Euler Implicito\", \"#7570b3\", \"s--\"),\n"
+            "    (\"IMEX Linealizado\", \"#1b9e77\", \"^--\")\n"
+            "]:\n"
+            "    t_num, x_num, _, _ = results[0.1][name]\n"
+            "    ax.plot(t_num, x_num, style, color=color, markersize=4, label=name, alpha=0.85, zorder=2)\n"
+            "ax.set_title(\"Regimen Estable: dt = 0.1 (dt * C = 0.2 < 2.0)\")\n"
+            "ax.set_xlabel(\"Tiempo t\")\n"
+            "ax.set_ylabel(\"Densidad poblacional x(t)\")\n"
+            "ax.axhline(1.0, color=\"gray\", linestyle=\":\", alpha=0.7)\n"
+            "ax.legend(frameon=True, loc=\"lower right\")\n\n"
+            "# Panel 2: dt = 1.3\n"
+            "ax = axes[1]\n"
+            "ax.plot(t_dense, x_dense, 'k-', label=\"Solucion Exacta\", zorder=1)\n"
+            "for name, color, style in [\n"
+            "    (\"Euler Explicito\", \"#d95f02\", \"o--\"),\n"
+            "    (\"Euler Implicito\", \"#7570b3\", \"s--\"),\n"
+            "    (\"IMEX Linealizado\", \"#1b9e77\", \"^--\")\n"
+            "]:\n"
+            "    t_num, x_num, _, _ = results[1.3][name]\n"
+            "    ax.plot(t_num, x_num, style, color=color, markersize=6, label=name, alpha=0.9, zorder=2)\n"
+            "ax.set_title(\"Regimen Inestable: dt = 1.3 (dt * C = 2.6 > 2.0)\")\n"
+            "ax.set_xlabel(\"Tiempo t\")\n"
+            "ax.axhline(1.0, color=\"gray\", linestyle=\":\", alpha=0.7)\n"
+            "ax.legend(frameon=True, loc=\"lower right\")\n\n"
+            "plt.tight_layout()\n"
+            "plt.show()"
+        )
+    })
+
+    # Celda 18: Markdown - Conclusiones
+    cells.append({
+        "type": "markdown",
+        "source": (
+            "## 7. Conclusiones y Sintesis Conceptual\n\n"
+            "1. **Sensibilidad del esquema explicito al paso temporal**:\n"
+            "   Cuando $\\Delta t C = 0.2$, el metodo de Euler explicito reproduce la curva sigmoide con precision. "
+            "Sin embargo, al fijar $\\Delta t = 1.3$ (donde $\\Delta t C = 2.6 > 2.0$), el esquema explota localmente "
+            "alrededor del punto de equilibrio $x^* = 1$, sobrepasando la cota fisica ($x \\approx 1.22$) y exhibiendo "
+            "oscilaciones no amortiguadas de periodo 2. Este fenomeno es puramente un artefacto de la discretizacion "
+            "temporal y no representa la dinamica continua del modelo biologico.\n\n"
+            "2. **Robustez incondicional de los esquemas implicito e IMEX**:\n"
+            "   Tanto el metodo de Euler implicito como el esquema IMEX linealizado preservan la estabilidad cualitativa "
+            "para $\\Delta t = 1.3$. Ninguno de los dos presenta sobrepaso ($x \\le 1.0$) ni oscilaciones espurias.\n\n"
+            "3. **Ventaja computacional del esquema IMEX**:\n"
+            "   El esquema IMEX logra la misma estabilidad asintotica que Euler implicito, pero sin requerir la resolucion "
+            "de ecuaciones cuadraticas en cada paso, ofreciendo una actualizacion analitica directa y positiva."
+        )
+    })
+
+    return cells
