@@ -1,26 +1,28 @@
 # Taller: Discretización de Sistemas Dinámicos y Problemas Inversos en Ciencia de Datos
 
-**Curso:** Métodos Numéricos / Modelamiento Matemático  
+**Curso:** Modelamiento Matemático  
 **Carrera:** Ingeniería Matemática en Ciencia de Datos (IMCD)  
 **Institución:** Universidad Nacional (UNA), Costa Rica  
 **Nivel:** 2.º Año | **Duración:** 3 horas
 
 ---
 
-## Cuadernos de Trabajo
+## Cuadernos de Trabajo (Acceso en Google Colab)
 
-El taller está dividido en cuatro cuadernos autocontenidos y progresivos. Cada cuaderno dispone de una versión para estudiantes (con funciones incompletas y pruebas de verificación) y una versión docente con la solución completa:
+El taller está dividido en cuatro cuadernos autocontenidos y progresivos. Puedes abrirlos y ejecutarlos directamente en Google Colab con un clic, sin necesidad de instalar nada en tu computadora:
 
 | Cuaderno | Temática | Versión Estudiante | Versión Solución |
 | :--- | :--- | :---: | :---: |
-| **01: Modelo Logístico** | EDO 1D, Euler explícito, implícito e IMEX, estabilidad según el paso temporal | [Estudiante](notebooks/estudiante/01_modelo_logistico.ipynb) | [Solución](notebooks/solucion/01_modelo_logistico.ipynb) |
-| **02: Modelo SIR y Estabilidad** | Modelo epidemiológico SIR, conservación de población total, comparación de esquemas y fallas de Euler explícito | [Estudiante](notebooks/estudiante/02_modelo_sir_estabilidad.ipynb) | [Solución](notebooks/solucion/02_modelo_sir_estabilidad.ipynb) |
-| **03: Datos Sintéticos y Ruido** | Simulación de referencia con RK45, muestreo discreto, ruido observacional Gaussiano y análisis de residuos | [Estudiante](notebooks/estudiante/03_datos_sinteticos_ruido.ipynb) | [Solución](notebooks/solucion/03_datos_sinteticos_ruido.ipynb) |
-| **04: Calibración y Problema Inverso** | Ajuste de parámetros por mínimos cuadrados, optimización Nelder-Mead y análisis del sesgo de discretización | [Estudiante](notebooks/estudiante/04_calibracion_problema_inverso.ipynb) | [Solución](notebooks/solucion/04_calibracion_problema_inverso.ipynb) |
+| **01: Modelo Logístico** | EDO 1D, Euler explícito, implícito e IMEX, estabilidad según el paso temporal | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/estudiante/01_modelo_logistico.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/solucion/01_modelo_logistico.ipynb) |
+| **02: Modelo SIR y Estabilidad** | Modelo epidemiológico SIR, conservación de población total, comparación de esquemas | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/estudiante/02_modelo_sir_estabilidad.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/solucion/02_modelo_sir_estabilidad.ipynb) |
+| **03: Datos Sintéticos y Ruido** | Simulación de referencia con RK45, muestreo discreto, ruido observacional Gaussiano y análisis de residuos | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/estudiante/03_datos_sinteticos_ruido.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/solucion/03_datos_sinteticos_ruido.ipynb) |
+| **04: Calibración y Problema Inverso** | Ajuste de parámetros por mínimos cuadrados, optimización Nelder-Mead y análisis del sesgo de discretización | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/estudiante/04_calibracion_problema_inverso.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/solucion/04_calibracion_problema_inverso.ipynb) |
 
 ---
 
-## Instalación y Ejecución Local
+## Instalación y Ejecución Local (Opcional)
+
+Ejecutar los cuadernos en Google Colab es la opción recomendada para el taller. De manera opcional, si prefieres trabajar en tu máquina local o ejecutar los scripts de consola:
 
 ### 1. Clonar el repositorio e instalar dependencias
 
