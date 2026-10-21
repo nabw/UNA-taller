@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Script 03: Generacion de datos sinteticos con ruido observacional Gaussiano.
+Script 03: Generación de datos sintéticos con ruido observacional Gaussiano.
 
-Simula el proceso de recoleccion de observaciones epidemiologicas:
-1. Generacion de la referencia continua mediante RK45 (Ground Truth).
-2. Muestreo en instantes temporales discretos (dias 0, 1, 2, ..., 50).
-3. Inyeccion de ruido observacional Gaussiano N(0, sigma^2), sigma = 0.02,
+Simula el proceso de recolección de observaciones epidemiológicas:
+1. Generación de la referencia continua mediante RK45 (Ground Truth).
+2. Muestreo en instantes temporales discretos (días 0, 1, 2, ..., 50).
+3. Inyección de ruido observacional Gaussiano N(0, sigma^2), sigma = 0.02,
    proyectado a valores no negativos.
-4. Analisis estadistico de residuos observacionales.
+4. Análisis estadístico de residuos observacionales.
 
 Universidad Nacional (UNA), Costa Rica.
 """
@@ -34,7 +34,7 @@ from src.synthetic import (
 
 
 def compute_statistics(y_clean: np.ndarray, y_noisy: np.ndarray) -> dict:
-    """Calcula metricas estadisticas descriptivas y de error observacional."""
+    """Calcula métricas estadísticas descriptivas y de error observacional."""
     residuals = y_noisy - y_clean
     return {
         "mean": float(np.mean(y_noisy)),
@@ -58,8 +58,8 @@ def main() -> None:
     sigma_gauss = 0.02
 
     print("=" * 80)
-    print("GENERACION DE DATOS SINTETICOS Y RUIDO OBSERVACIONAL")
-    print(f"Parametros: beta = {beta:.2f}, gamma = {gamma:.2f}, R0 = {beta/gamma:.2f}")
+    print("GENERACIÓN DE DATOS SINTÉTICOS Y RUIDO OBSERVACIONAL")
+    print(f"Parámetros: beta = {beta:.2f}, gamma = {gamma:.2f}, R0 = {beta/gamma:.2f}")
     print(f"Ruido Gaussiano: sigma = {sigma_gauss:.4f}")
     print("=" * 80)
 
@@ -68,14 +68,14 @@ def main() -> None:
         beta=beta, gamma=gamma, S0=S0, I0=I0, T=T, dt_ref=0.005
     )
 
-    # 2. Muestreo discreto en dias t_k = 0, 1, ..., 50
+    # 2. Muestreo discreto en días t_k = 0, 1, ..., 50
     t_obs = np.arange(0.0, T + 1.0, 1.0)
     I_clean = sample_observations(t_ref=t_ref, I_ref=I_ref, sample_times=t_obs)
 
     # 3. Ruido Gaussiano
     I_gauss = add_gaussian_noise(I_clean, sigma=sigma_gauss, seed=seed)
 
-    # 4. Estadisticas
+    # 4. Estadísticas
     stats_clean = {
         "mean": float(np.mean(I_clean)),
         "std": float(np.std(I_clean)),
@@ -88,9 +88,9 @@ def main() -> None:
     }
     stats_gauss = compute_statistics(I_clean, I_gauss)
 
-    print("\nResumen estadistico de las series de infectados I(t):")
+    print("\nResumen estadístico de las series de infectados I(t):")
     print("-" * 80)
-    header = f"{'Serie':<25} | {'Media':<9} | {'Desv.Est':<9} | {'Minimo':<8} | {'Maximo':<8} | {'RMSE':<9} | {'MAE':<9}"
+    header = f"{'Serie':<25} | {'Media':<9} | {'Desv.Est':<9} | {'Mínimo':<8} | {'Máximo':<8} | {'RMSE':<9} | {'MAE':<9}"
     print(header)
     print("-" * len(header))
 
@@ -105,10 +105,10 @@ def main() -> None:
         )
 
     print("-" * 80)
-    print(f"Media de residuos: {stats_gauss['res_mean']:+.4e} (teorica = 0.0)")
-    print(f"Desv. est. residuos: {stats_gauss['res_std']:.4f} (teorica = {sigma_gauss:.4f})")
+    print(f"Media de residuos: {stats_gauss['res_mean']:+.4e} (teórica = 0.0)")
+    print(f"Desv. est. residuos: {stats_gauss['res_std']:.4f} (teórica = {sigma_gauss:.4f})")
 
-    # 5. Visualizacion
+    # 5. Visualización
     fig, (ax1, ax2) = plt.subplots(
         2, 1, figsize=(10, 7.5), sharex=True, gridspec_kw={"height_ratios": [2, 1.2]}
     )
@@ -133,8 +133,8 @@ def main() -> None:
         zorder=4
     )
 
-    ax1.set_title("Datos sinteticos de infectados $I(t)$", fontsize=12, pad=10)
-    ax1.set_ylabel("Proporcion de infectados $I(t)$", fontsize=10)
+    ax1.set_title("Datos sintéticos de infectados $I(t)$", fontsize=12, pad=10)
+    ax1.set_ylabel("Proporción de infectados $I(t)$", fontsize=10)
     ax1.grid(True, linestyle=":", alpha=0.6)
     ax1.legend(loc="upper right", framealpha=0.9, fontsize=9.5)
 
@@ -152,7 +152,7 @@ def main() -> None:
     )
 
     ax2.set_title("Residuos observacionales: $I_{obs}(t) - I_{real}(t)$", fontsize=11, pad=8)
-    ax2.set_xlabel("Tiempo $t$ [dias]", fontsize=10)
+    ax2.set_xlabel("Tiempo $t$ [días]", fontsize=10)
     ax2.set_ylabel("Residuo", fontsize=10)
     ax2.set_ylim(-0.065, 0.065)
     ax2.grid(True, linestyle=":", alpha=0.6)

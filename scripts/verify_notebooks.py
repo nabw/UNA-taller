@@ -46,7 +46,7 @@ def check_no_big_o(text: str, path: str) -> None:
 
 
 def main():
-    print("Iniciando validacion rigurosa de cuadernos...")
+    print("Iniciando validación rigurosa de cuadernos...")
     for p_str in notebooks:
         p = Path(p_str)
         assert p.exists(), f"El archivo no existe: {p_str}"
@@ -67,7 +67,7 @@ def main():
             src = "".join(cell["source"])
             check_no_emojis(src, p_str)
             check_no_big_o(src, p_str)
-            if "# TU CODIGO AQUI" in src:
+            if "# TU CODIGO AQUI" in src or "# TU CÓDIGO AQUÍ" in src:
                 has_tu_codigo = True
             if "assert " in src:
                 has_assert = True
@@ -78,26 +78,26 @@ def main():
                         has_images = True
 
         if "estudiante" in p_str:
-            assert has_tu_codigo, f"Cuaderno de estudiante {p_str} no tiene '# TU CODIGO AQUI'"
+            assert has_tu_codigo, f"Cuaderno de estudiante {p_str} no tiene '# TU CÓDIGO AQUÍ'"
             assert has_assert, f"Cuaderno de estudiante {p_str} no tiene 'assert'"
             assert not has_outputs, f"Cuaderno de estudiante {p_str} contiene salidas no deseadas"
-            print(f"  [OK] {p_str:58s} | Celdas: {len(cells):2d} | Stubs: SI | Asserts: SI | Sin salidas: SI")
+            print(f"  [OK] {p_str:58s} | Celdas: {len(cells):2d} | Stubs: SÍ | Asserts: SÍ | Sin salidas: SÍ")
         else:
-            assert not has_tu_codigo, f"Cuaderno de solucion {p_str} contiene '# TU CODIGO AQUI'"
-            assert has_assert, f"Cuaderno de solucion {p_str} no tiene 'assert'"
-            assert has_outputs, f"Cuaderno de solucion {p_str} no tiene salidas"
-            assert has_images, f"Cuaderno de solucion {p_str} no tiene figuras generadas"
-            print(f"  [OK] {p_str:58s} | Celdas: {len(cells):2d} | Completo: SI | Salidas: SI | Figuras: SI")
+            assert not has_tu_codigo, f"Cuaderno de solución {p_str} contiene '# TU CÓDIGO AQUÍ'"
+            assert has_assert, f"Cuaderno de solución {p_str} no tiene 'assert'"
+            assert has_outputs, f"Cuaderno de solución {p_str} no tiene salidas"
+            assert has_images, f"Cuaderno de solución {p_str} no tiene figuras generadas"
+            print(f"  [OK] {p_str:58s} | Celdas: {len(cells):2d} | Completo: SÍ | Salidas: SÍ | Figuras: SÍ")
 
-    # Verificar eliminacion de cuadernos antiguos
+    # Verificar eliminación de cuadernos antiguos
     old1 = Path("notebooks/01_laboratorio_estudiante.ipynb")
     old2 = Path("notebooks/01_laboratorio_solucion.ipynb")
-    assert not old1.exists(), "El archivo antiguo 01_laboratorio_estudiante.ipynb aun existe"
-    assert not old2.exists(), "El archivo antiguo 01_laboratorio_solucion.ipynb aun existe"
+    assert not old1.exists(), "El archivo antiguo 01_laboratorio_estudiante.ipynb aún existe"
+    assert not old2.exists(), "El archivo antiguo 01_laboratorio_solucion.ipynb aún existe"
 
     print("\nTodos los requisitos fueron verificados exitosamente:")
-    print("1. 8 cuadernos creados (4 estudiante, 4 solucion).")
-    print("2. Formato nbformat 4.5 JSON estandar y valido.")
+    print("1. 8 cuadernos creados (4 estudiante, 4 solución).")
+    print("2. Formato nbformat 4.5 JSON estándar y válido.")
     print("3. CERO emojis detectados.")
     print("4. CERO notaciones Big-O.")
     print("5. Autocontenidos y probados.")

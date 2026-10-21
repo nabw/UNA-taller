@@ -62,15 +62,15 @@ def check_no_emojis(text: str) -> None:
 
 
 def check_no_big_o(text: str) -> None:
-    """Verifica que el texto no contenga notacion de complejidad asintotica Big-O."""
+    """Verifica que el texto no contenga notación de complejidad asintótica Big-O."""
     pattern = r"(\\mathcal\{?O\}?|(?<![a-zA-Z0-9_])O)\s*\([a-zA-Z0-9_\\^+\-* /]+\)"
     match = re.search(pattern, text)
     if match:
-        raise ValueError(f"Notacion Big-O detectada: '{match.group(0)}' en texto:\n{text[:120]}")
+        raise ValueError(f"Notación Big-O detectada: '{match.group(0)}' en texto:\n{text[:120]}")
 
 
 def raw_cells_to_nb_cells(raw_cells: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Convierte la lista de especificaciones de celda en celdas estandar de Jupyter."""
+    """Convierte la lista de especificaciones de celda en celdas estándar de Jupyter."""
     nb_cells = []
     for rc in raw_cells:
         cell_type = rc["type"]
@@ -103,6 +103,28 @@ def raw_cells_to_nb_cells(raw_cells: List[Dict[str, Any]]) -> List[Dict[str, Any
         else:
             raise ValueError(f"Tipo de celda desconocido: {cell_type}")
     return nb_cells
+
+
+def add_colab_badge(nb_cells: List[Dict[str, Any]], subfolder: str, filename: str) -> None:
+    """Inserta el badge de Google Colab en la primera celda markdown del cuaderno."""
+    if not nb_cells:
+        return
+    first_cell = nb_cells[0]
+    if first_cell.get("cell_type") != "markdown":
+        return
+
+    colab_base = "https://colab.research.google.com/github/nabw/UNA-taller/blob/main/notebooks/"
+    badge_md = f"[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]({colab_base}{subfolder}/{filename})\n\n"
+
+    src_lines = first_cell.get("source", [])
+    if src_lines and any("colab-badge" in line for line in src_lines):
+        return
+
+    if src_lines and src_lines[0].startswith("#"):
+        new_source = [src_lines[0], "\n", badge_md] + src_lines[1:]
+    else:
+        new_source = [badge_md] + src_lines
+    first_cell["source"] = new_source
 
 
 def execute_notebook_cells(cells: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -235,9 +257,10 @@ def main():
     for filename, builder_fn in notebook_configs:
         print(f"\nGenerando {filename}...")
 
-        # 1. Version Estudiante
+        # 1. Versión Estudiante
         raw_cells_est = builder_fn(is_solution=False)
         nb_cells_est = raw_cells_to_nb_cells(raw_cells_est)
+        add_colab_badge(nb_cells_est, "estudiante", filename)
         nb_dict_est = make_notebook(nb_cells_est)
 
         path_est = dir_estudiante / filename
@@ -245,17 +268,18 @@ def main():
             json.dump(nb_dict_est, f, indent=1, ensure_ascii=False)
         print(f"  [OK] Estudiante guardado en: {path_est.relative_to(base_dir)}")
 
-        # 2. Version Solucion (ejecutada con captura de salidas)
+        # 2. Versión Solución (ejecutada con captura de salidas)
         raw_cells_sol = builder_fn(is_solution=True)
         nb_cells_sol = raw_cells_to_nb_cells(raw_cells_sol)
-        print(f"  Ejecutando celdas de solucion para {filename}...")
+        add_colab_badge(nb_cells_sol, "solucion", filename)
+        print(f"  Ejecutando celdas de solución para {filename}...")
         executed_cells_sol = execute_notebook_cells(nb_cells_sol)
         nb_dict_sol = make_notebook(executed_cells_sol)
 
         path_sol = dir_solucion / filename
         with open(path_sol, "w", encoding="utf-8") as f:
             json.dump(nb_dict_sol, f, indent=1, ensure_ascii=False)
-        print(f"  [OK] Solucion guardada en:   {path_sol.relative_to(base_dir)}")
+        print(f"  [OK] Solución guardada en:   {path_sol.relative_to(base_dir)}")
 
     # 3. Remover cuadernos antiguos obsoletos
     old_notebooks = [
@@ -268,7 +292,7 @@ def main():
             print(f"  [REMOVIDO] Cuaderno antiguo eliminado: {old_nb.relative_to(base_dir)}")
 
     print("\n" + "=" * 80)
-    print("PROCESO DE GENERACION COMPLETADO CON EXITO.")
+    print("PROCESO DE GENERACIÓN COMPLETADO CON ÉXITO.")
     print("=" * 80)
 
 

@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 """
-Script 02: Simulacion del problema directo SIR y conservacion de masa.
+Script 02: Simulación del problema directo SIR y conservación de masa.
 
-Compara la integracion numerica del sistema epidemiologico:
+Compara la integración numérica del sistema epidemiológico:
     dS/dt = - beta * S * I
     dI/dt =   beta * S * I - gamma * I
     dR/dt =   gamma * I
 
-Esquemas numericos evaluados:
-1. Euler Explicito
-2. Euler Implicito
-3. Esquema IMEX (Implicito-Explicito Conservativo)
-4. Solucion de referencia continua (RK45 adaptativo)
+Esquemas numéricos evaluados:
+1. Euler Explícito
+2. Euler Implícito
+3. Esquema IMEX (Implícito-Explícito Conservativo)
+4. Solución de referencia continua (RK45 adaptativo)
 
-Regimenes temporales evaluados:
-- Paso fino: dt = 0.5 dias
-- Paso moderado: dt = 2.5 dias (donde Euler explicito sobreestima marcadamente
-  el pico epidemico y desfasa la onda epidemica)
+Regímenes temporales evaluados:
+- Paso fino: dt = 0.5 días
+- Paso moderado: dt = 2.5 días (donde Euler explícito sobreestima marcadamente
+  el pico epidémico y desfasa la onda epidémica)
 
-Invariante fisica:
-    S(t) + I(t) + R(t) = 1.0 (conservacion de la poblacion total)
+Invariante física:
+    S(t) + I(t) + R(t) = 1.0 (conservación de la población total)
 
 Universidad Nacional (UNA), Costa Rica.
 """
@@ -58,10 +58,10 @@ def main() -> None:
     dt_moderate = 2.5
 
     print("=" * 85)
-    print("SIMULACION DEL MODELO SIR - METODOS NUMERICOS Y ESTABILIDAD")
-    print(f"Parametros: beta = {beta:.2f}, gamma = {gamma:.2f}, R0 = {R0_basic:.2f}")
-    print(f"Condiciones iniciales: S(0) = {S0:.2f}, I(0) = {I0:.2f}, R(0) = {1.0 - S0 - I0:.2f}, T = {T:.1f} dias")
-    print(f"Comparacion: dt_fino = {dt_fine} dias vs dt_moderado = {dt_moderate} dias")
+    print("SIMULACIÓN DEL MODELO SIR - MÉTODOS NUMÉRICOS Y ESTABILIDAD")
+    print(f"Parámetros: beta = {beta:.2f}, gamma = {gamma:.2f}, R0 = {R0_basic:.2f}")
+    print(f"Condiciones iniciales: S(0) = {S0:.2f}, I(0) = {I0:.2f}, R(0) = {1.0 - S0 - I0:.2f}, T = {T:.1f} días")
+    print(f"Comparación: dt_fino = {dt_fine} días vs dt_moderado = {dt_moderate} días")
     print("=" * 85)
 
     # Referencia continua RK45
@@ -71,7 +71,7 @@ def main() -> None:
     peak_idx_ref = int(np.argmax(I_ref))
     t_peak_ref = float(t_ref[peak_idx_ref])
     I_peak_ref = float(I_ref[peak_idx_ref])
-    print(f"\n[Referencia RK45] Pico de infectados: I_max = {I_peak_ref:.4f} en t = {t_peak_ref:.2f} dias")
+    print(f"\n[Referencia RK45] Pico de infectados: I_max = {I_peak_ref:.4f} en t = {t_peak_ref:.2f} días")
 
     dt_experiments = [
         ("Paso fino", dt_fine),
@@ -81,14 +81,14 @@ def main() -> None:
     fig, axes = plt.subplots(2, 4, figsize=(16, 7.5), sharex="col")
 
     solver_styles = {
-        "Explicito": {"color": "#d62728", "ls": ":", "marker": "o", "zorder": 4},
-        "Implicito": {"color": "#1f77b4", "ls": "-.", "marker": "s", "zorder": 3},
+        "Explícito": {"color": "#d62728", "ls": ":", "marker": "o", "zorder": 4},
+        "Implícito": {"color": "#1f77b4", "ls": "-.", "marker": "s", "zorder": 3},
         "IMEX": {"color": "#2ca02c", "ls": "--", "marker": "^", "zorder": 5},
     }
 
     for row_idx, (case_name, dt) in enumerate(dt_experiments):
         print(f"\n" + "-" * 85)
-        print(f"EVALUACION PARA {case_name.upper()} (dt = {dt:.2f} dias)")
+        print(f"EVALUACIÓN PARA {case_name.upper()} (dt = {dt:.2f} días)")
         print("-" * 85)
 
         t_exp, S_exp, I_exp, R_exp = solve_sir_explicit(S0, I0, beta, gamma, dt, T)
@@ -96,13 +96,13 @@ def main() -> None:
         t_imex, S_imex, I_imex, R_imex = solve_sir_imex(S0, I0, beta, gamma, dt, T)
 
         results = {
-            "Explicito": (t_exp, S_exp, I_exp, R_exp),
-            "Implicito": (t_imp, S_imp, I_imp, R_imp),
+            "Explícito": (t_exp, S_exp, I_exp, R_exp),
+            "Implícito": (t_imp, S_imp, I_imp, R_imp),
             "IMEX": (t_imex, S_imex, I_imex, R_imex),
         }
 
         header = (
-            f"{'Metodo':<12} | {'max |S+I+R - 1|':<17} | {'min(S)':<9} | {'min(I)':<9} | "
+            f"{'Método':<12} | {'max |S+I+R - 1|':<17} | {'min(S)':<9} | {'min(I)':<9} | "
             f"{'I_max':<9} | {'t_pico':<8} | {'RMSE(I)':<10} | {'Comportamiento'}"
         )
         print(header)
@@ -188,11 +188,11 @@ def main() -> None:
         axes[row_idx, 0].plot(t_ref, S_ref, "k-", linewidth=2.0, label="Referencia RK45", zorder=2)
         axes[row_idx, 1].plot(t_ref, I_ref, "k-", linewidth=2.0, label="Referencia RK45", zorder=2)
         axes[row_idx, 2].plot(t_ref, R_ref, "k-", linewidth=2.0, label="Referencia RK45", zorder=2)
-        axes[row_idx, 3].axhline(1.0, color="k", linestyle="-", linewidth=1.5, alpha=0.7, label="Poblacion total = 1")
+        axes[row_idx, 3].axhline(1.0, color="k", linestyle="-", linewidth=1.5, alpha=0.7, label="Población total = 1")
 
-        axes[row_idx, 0].set_ylabel(f"{case_name}\n(dt = {dt} d)\n\nProporcion S(t)", fontsize=10)
-        axes[row_idx, 1].set_ylabel("Proporcion I(t)", fontsize=10)
-        axes[row_idx, 2].set_ylabel("Proporcion R(t)", fontsize=10)
+        axes[row_idx, 0].set_ylabel(f"{case_name}\n(dt = {dt} d)\n\nProporción S(t)", fontsize=10)
+        axes[row_idx, 1].set_ylabel("Proporción I(t)", fontsize=10)
+        axes[row_idx, 2].set_ylabel("Proporción R(t)", fontsize=10)
         axes[row_idx, 3].set_ylabel("S(t) + I(t) + R(t)", fontsize=10)
 
         for col in range(4):
@@ -202,18 +202,18 @@ def main() -> None:
                     "Susceptibles S(t)",
                     "Infectados I(t)",
                     "Recuperados R(t)",
-                    "Conservacion de Masa",
+                    "Conservación de Masa",
                 ]
                 axes[0, col].set_title(titles[col], fontsize=11, fontweight="bold", pad=8)
 
         axes[row_idx, 3].set_ylim(0.998, 1.002)
 
     for col in range(4):
-        axes[1, col].set_xlabel("Tiempo t [dias]", fontsize=10)
+        axes[1, col].set_xlabel("Tiempo t [días]", fontsize=10)
     axes[0, 1].legend(loc="upper right", fontsize=8.5, framealpha=0.9)
 
     fig.suptitle(
-        r"Comparacion de esquemas numericos en el modelo SIR ($\beta=0.4, \gamma=0.1$)",
+        r"Comparación de esquemas numéricos en el modelo SIR ($\beta=0.4, \gamma=0.1$)",
         fontsize=13, y=0.99
     )
     fig.tight_layout()
