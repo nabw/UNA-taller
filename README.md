@@ -62,8 +62,11 @@ python3 scripts/04_calibracion_inversa.py
 En la carpeta `appendix/` se incluyen documentos teóricos y prácticos complementarios para profundizar en aspectos específicos del taller:
 
 - **[Estabilidad Temporal](appendix/estabilidad_temporal.md):** Formalización de la estabilidad lineal con la ecuación de prueba de Dahlquist, el factor de amplificación y la deducción del Euler implícito cuadrático para SIR.
+- **[Método de Runge-Kutta y SciPy](appendix/runge_kutta_scipy.md):** Formulación algebraica de RK4, tasa de convergencia de orden 4 y ejemplos prácticos de uso de `scipy.integrate.solve_ivp` para modelos 1D y sistemas 2D.
+- **[Resolución de Ecuaciones No Lineales](appendix/solucion_no_lineal_scipy.md):** Formulación de problemas de raíz en integración implícita y arquetipo de resolución con `scipy.optimize.root`.
+- **[Interpolación de Datos en Python](appendix/interpolacion_datos.md):** Métodos de submuestreo y alineamiento temporal con `np.interp` y splines cúbicos de SciPy.
 - **[Guía de Vectorización en NumPy](appendix/vectorizacion_numpy.md):** Fundamentos prácticos sobre prealocación en memoria contigua de C, eliminación de verificaciones del intérprete y operaciones en bloques.
-- **[Ruido de Conteo y Distribución de Poisson](appendix/ruido_conteo_poisson.md):** Justificación matemática de por qué el ruido Gaussiano es solo una aproximación pedagógica inicial y detalles del modelo de Poisson para conteos epidemiológicos discretos.
+- **[Ruido de Conteo y Distribución de Poisson](appendix/ruido_conteo_poisson.md):** Justificación matemática de por qué el ruido Gaussiano es solo una aproximación inicial y detalles del modelo de Poisson para conteos epidemiológicos discretos.
 
 ---
 
@@ -85,6 +88,9 @@ UNA-taller/
 │   └── figura_*.png                   # Gráficos generados
 ├── appendix/                          # Documentos teóricos complementarios
 │   ├── estabilidad_temporal.md        # Estabilidad lineal y deducción SIR implícito
+│   ├── runge_kutta_scipy.md           # Formulación algebraica de RK4 y solve_ivp
+│   ├── solucion_no_lineal_scipy.md    # Ecuaciones no lineales implícitas con SciPy
+│   ├── interpolacion_datos.md         # Submuestreo e interpolación con NumPy y SciPy
 │   ├── vectorizacion_numpy.md         # Rendimiento y memoria en NumPy
 │   └── ruido_conteo_poisson.md        # Comparación teórica de ruido Gaussiano vs Poisson
 ├── notebooks/                         # Cuadernos interactivos Jupyter

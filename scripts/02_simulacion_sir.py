@@ -16,7 +16,7 @@ Esquemas numéricos evaluados:
 Regímenes temporales evaluados:
 - Paso fino: dt = 0.5 días
 - Paso moderado: dt = 2.5 días (donde Euler explícito sobreestima marcadamente
-  el pico epidémico y desfasa la onda epidémica)
+  el peak epidémico y desfasa la onda epidémica)
 
 Invariante física:
     S(t) + I(t) + R(t) = 1.0 (conservación de la población total)
@@ -71,7 +71,7 @@ def main() -> None:
     peak_idx_ref = int(np.argmax(I_ref))
     t_peak_ref = float(t_ref[peak_idx_ref])
     I_peak_ref = float(I_ref[peak_idx_ref])
-    print(f"\n[Referencia RK45] Pico de infectados: I_max = {I_peak_ref:.4f} en t = {t_peak_ref:.2f} días")
+    print(f"\n[Referencia RK45] Peak de infectados: I_max = {I_peak_ref:.4f} en t = {t_peak_ref:.2f} días")
 
     dt_experiments = [
         ("Paso fino", dt_fine),
@@ -103,7 +103,7 @@ def main() -> None:
 
         header = (
             f"{'Método':<12} | {'max |S+I+R - 1|':<17} | {'min(S)':<9} | {'min(I)':<9} | "
-            f"{'I_max':<9} | {'t_pico':<8} | {'RMSE(I)':<10} | {'Comportamiento'}"
+            f"{'I_max':<9} | {'t_peak':<8} | {'RMSE(I)':<10} | {'Comportamiento'}"
         )
         print(header)
         print("-" * len(header))
@@ -125,7 +125,7 @@ def main() -> None:
             if min_s < -1e-6 or min_i < -1e-6:
                 diagnostico = "Viola no-negatividad"
             elif rel_err_peak > 10.0:
-                diagnostico = f"Sobreestima pico (+{rel_err_peak:.1f}%)"
+                diagnostico = f"Sobreestima peak (+{rel_err_peak:.1f}%)"
             elif max_dev_mass < 1e-12:
                 diagnostico = "Conserva masa exacta"
             else:

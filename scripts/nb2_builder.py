@@ -29,7 +29,7 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "- $\\beta > 0$ es la tasa efectiva de transmisión por contacto.\n"
             "- $\\gamma > 0$ es la tasa media de recuperación (o remoción), con tiempo medio infeccioso $1/\\gamma$.\n"
             "- El número reproductivo básico es $R_0 = \\frac{\\beta}{\\gamma}$. "
-            "Si $R_0 > 1$ y $S(0) \\approx 1$, la enfermedad experimenta un crecimiento inicial y alcanza un pico epidémico.\n\n"
+            "Si $R_0 > 1$ y $S(0) \\approx 1$, la enfermedad experimenta un crecimiento inicial y alcanza un peak epidémico.\n\n"
             "### Invariante Fundamental: Conservación de Masa\n\n"
             "Sumando las tres derivadas del sistema:\n\n"
             "$$\\frac{d}{dt}(S + I + R) = -\\beta S I + (\\beta S I - \\gamma I) + \\gamma I = 0$$\n\n"
@@ -42,7 +42,7 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "3. Implementar el método de Euler implícito resolviendo analíticamente la ecuación cuadrática desacoplada.\n"
             "4. Implementar el esquema Implícito-Explícito (IMEX) y demostrar analíticamente la conservación de masa.\n"
             "5. Comparar los esquemas en tres regímenes: paso fino ($\\Delta t = 0.5$ días), paso moderado ($\\Delta t = 2.5$ días) "
-            "donde Euler explícito sobreestima el pico epidémico en más de un 13%, y paso grande ($\\Delta t = 5.0$ días)."
+            "donde Euler explícito sobreestima el peak epidémico en más de un 13%, y paso grande ($\\Delta t = 5.0$ días)."
         )
     })
 
@@ -76,7 +76,10 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "## 2. Solución Continua de Referencia (RK45)\n\n"
             "Para evaluar la fidelidad de los integradores con paso fijo, establecemos una trayectoria "
             "de referencia de alta precisión mediante integración Runge-Kutta adaptativa con control local de error "
-            "(tolerancias $rtol = 10^{-10}$, $atol = 10^{-12}$)."
+            "(tolerancias $rtol = 10^{-10}$, $atol = 10^{-12}$).\n\n"
+            "Para una descripción algebraica del método de Runge-Kutta, su tasa de convergencia de orden 4 y "
+            "ejemplos prácticos de uso con `scipy.integrate.solve_ivp` (incluyendo la EDO logística 1D y sistemas 2D), "
+            "consulta el [Apéndice Teórico-Práctico: El Método de Runge-Kutta y su Implementación con SciPy](../../appendix/runge_kutta_scipy.md)."
         )
     })
 
@@ -163,7 +166,7 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "Aunque la suma se conserva exactamente en la aritmética discreta, si $\\Delta t$ es moderado o grande, "
             "el esquema sufre de errores acumulados en la tasa de contagio: en la fase ascendente, la tasa de nuevos infectados "
             "se calcula con la población susceptible del inicio del paso ($S_n$), sobreestimando fuertemente la transmisión "
-            "y falseando la magnitud y el tiempo del pico."
+            "y falseando la magnitud y el tiempo del peak."
         )
     })
 
@@ -254,7 +257,11 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "Una vez obtenido $I_{n+1}$, se actualizan de inmediato:\n\n"
             "$$S_{n+1} = \\frac{S_n}{1 + \\Delta t \\beta I_{n+1}}, \\quad R_{n+1} = R_n + \\Delta t \\gamma I_{n+1}$$\n\n"
             "Para detalles analíticos adicionales sobre la existencia de esta raíz física, "
-            "consulta el [Apéndice Teórico: Estabilidad Temporal](../../appendix/estabilidad_temporal.md)."
+            "consulta el [Apéndice Teórico: Estabilidad Temporal](../../appendix/estabilidad_temporal.md).\n\n"
+            "En problemas más generales donde no es posible despejar algebraicamente la raíz, "
+            "se emplean resolvedores numéricos no lineales (como `scipy.optimize.root`). Para un arquetipo "
+            "reutilizable sobre cómo resolver ecuaciones implícitas no lineales en Python con SciPy, consulta el "
+            "[Apéndice Técnico: Resolución de Ecuaciones No Lineales con SciPy](../../appendix/solucion_no_lineal_scipy.md)."
         )
     })
 
@@ -418,7 +425,7 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "## 6. Comparación Pedagógica en Tres Regímenes Temporales\n\n"
+            "## 6. Comparación en Tres Regímenes Temporales\n\n"
             "Fijamos los parámetros epidemiológicos de referencia:\n"
             "- Tasa de transmisión: $\\beta = 0.4$\n"
             "- Tasa de recuperación: $\\gamma = 0.1$\n"
@@ -427,14 +434,14 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "- Horizonte: $T = 50.0$ días\n\n"
             "Comparamos los integradores bajo tres pasos temporales:\n"
             "1. **Paso Fino ($\\Delta t = 0.5$ días)**: Alta fidelidad frente a la trayectoria continua.\n"
-            "2. **Paso Moderado ($\\Delta t = 2.5$ días)**: Régimen clave. Euler explícito sobreestima el pico "
+            "2. **Paso Moderado ($\\Delta t = 2.5$ días)**: Régimen clave. Euler explícito sobreestima el peak "
             "epidémico en más de un 13% y adelanta la ola epidémica, demostrando el sesgo intrínseco del método "
             "sin recurrir a pasos temporales absurdamente grandes.\n"
             "3. **Paso Grande ($\\Delta t = 5.0$ días)**: Régimen de inestabilidad numérica severa."
         )
     })
 
-    # Celda 16: Código - Ejecución y tabla de métricas del pico epidémico
+    # Celda 16: Código - Ejecución y tabla de métricas del peak epidémico
     cells.append({
         "type": "code",
         "source": (
@@ -449,9 +456,9 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "I_peak_ref = float(I_ref[idx_peak_ref])\n"
             "t_peak_ref = float(t_ref[idx_peak_ref])\n\n"
             "print(\"=\" * 85)\n"
-            "print(f\"REFERENCIA CONTINUA (RK45): Pico I_max = {I_peak_ref:.4f} en t = {t_peak_ref:.2f} días\")\n"
+            "print(f\"REFERENCIA CONTINUA (RK45): Peak I_max = {I_peak_ref:.4f} en t = {t_peak_ref:.2f} días\")\n"
             "print(\"=\" * 85)\n"
-            "print(f\"{'dt (días)':>9s} | {'Método':>16s} | {'I_max':>8s} | {'Error I_max (%)':>16s} | {'t_pico':>8s} | {'Max |Sum-1|':>12s}\")\n"
+            "print(f\"{'dt (días)':>9s} | {'Método':>16s} | {'I_max':>8s} | {'Error I_max (%)':>16s} | {'t_peak':>8s} | {'Max |Sum-1|':>12s}\")\n"
             "print(\"-\" * 85)\n\n"
             "dt_regimes = [0.5, 2.5, 5.0]\n"
             "sim_data = {}\n\n"
@@ -508,11 +515,11 @@ def build_nb2_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "## 7. Conclusiones y Síntesis Epidemiológica\n\n"
             "1. **Defecto Sistemático de Euler Explícito en Pasos Moderados ($\\Delta t = 2.5$)**:\n"
             "   Incluso sin entrar en inestabilidades caóticas, a $\\Delta t = 2.5$ días Euler explícito "
-            "sobreestima el pico epidémico máximo en $+13.60\\%$ ($I_{\\max} = 0.4612$ frente a $0.4059$ de RK45) "
-            "y desfasa la llegada del pico a $t = 22.5$ días. Esto evidencia que un paso temporal moderado ya falsea "
+            "sobreestima el peak epidémico máximo en $+13.60\\%$ ($I_{\\max} = 0.4612$ frente a $0.4059$ de RK45) "
+            "y desfasa la llegada del peak a $t = 22.5$ días. Esto evidencia que un paso temporal moderado ya falsea "
             "completamente las proyecciones de camas hospitalarias en un modelo epidemiológico.\n\n"
             "2. **Comportamiento Amortiguador de los Métodos Implícito e IMEX**:\n"
-            "   Euler implícito e IMEX subestiman levemente el pico en pasos moderados, actuando como disipadores "
+            "   Euler implícito e IMEX subestiman levemente el peak en pasos moderados, actuando como disipadores "
             "numéricos estables que garantizan la estabilidad asintótica sin inducir sobrepasos no físicos.\n\n"
             "3. **Conservación Estricta de Masa**:\n"
             "   Los tres esquemas discretos conservan la suma poblacional $S + I + R = 1.0$ al nivel de precisión "

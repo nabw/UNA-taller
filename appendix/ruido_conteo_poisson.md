@@ -49,7 +49,7 @@ $$\text{Var}(I_{\text{obs}}) = \text{Var}\left( \frac{C_k}{N_{\text{pop}}} \righ
 ### Implicación Estructural: El Efecto Embudo
 
 La varianza de la proporción observada depende directamente del nivel de infección $I(t_k)$:
-- **Pico de la epidemia:** Cuando $I(t_k)$ alcanza su valor máximo, la varianza absoluta es mayor.
+- **Peak de la epidemia:** Cuando $I(t_k)$ alcanza su valor máximo, la varianza absoluta es mayor.
 - **Colas de la epidemia:** Cuando $I(t_k) \to 0$ (al inicio o al final del brote), la varianza se aproxima a cero.
 
 Esta dependencia explícita de la varianza respecto a la media genera un comportamiento de "embudo" en los diagramas de dispersión temporal de los residuos, invalidando el supuesto de homocedasticidad requerido por los métodos de mínimos cuadrados ordinarios clásicos.
