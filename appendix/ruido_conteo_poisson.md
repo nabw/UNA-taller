@@ -10,7 +10,7 @@ Aunque este enfoque es útil desde el punto de vista pedagógico por su simplici
 
 1. **Variables continuas sobre la recta real:** La distribución normal asigna probabilidad no nula a cualquier valor en $(-\infty, \infty)$. Sin embargo, los casos de infección son necesariamente cantidades enteras no negativas.
 2. **Valores negativos:** Con desviaciones estándar moderadas o altas ($\sigma$), el modelo estocástico puede generar proporciones o conteos negativos, lo que obliga a aplicar truncamientos artificiales (por ejemplo, recortar en cero) que deforman la distribución estadística.
-3. **Homocedasticidad artificial:** El ruido gaussiano estándar asume que la varianza $\sigma^2$ es constante e independiente de la magnitud del brote. En la práctica, los datos de conteo muestran mayor variabilidad absoluta en los peaks epidémicos y menor variabilidad en los periodos de baja incidencia.
+3. **Homocedasticidad artificial:** El ruido gaussiano estándar asume que la varianza $\sigma^2$ es constante e independiente de la magnitud del brote. En la práctica, los datos de conteo muestran mayor variabilidad absoluta en los peaks epidémicos y menor variabilidad en los períodos de baja incidencia.
 
 ---
 
@@ -24,7 +24,7 @@ $$C_k \sim \text{Poisson}(\lambda_k)$$
 
 donde el parámetro de tasa $\lambda_k$ está determinado por la proporción de infectados predicha por el modelo determinista y el tamaño poblacional:
 
-$$\lambda_k = N_{\text{pop}} \cdot I(t_k)$$
+$$\lambda_k = N_{\text{pop}} I(t_k)$$
 
 ### Propiedades Fundamentales
 

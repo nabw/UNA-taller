@@ -199,7 +199,7 @@ def main() -> None:
     path_bias = out_dir / "figura_04_sesgo_discretizacion.png"
     fig_bias.savefig(path_bias, dpi=300)
     plt.close(fig_bias)
-    print(f"\n[OK] Gráfico de sesgo de discretización guardado en: {path_bias}")
+    print(f"\nFigura guardada en: {path_bias}")
     print("=" * 85)
 
 

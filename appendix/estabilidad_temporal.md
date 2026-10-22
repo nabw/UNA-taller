@@ -86,6 +86,6 @@ $$\dot{u} = -C u$$
 
 Si se integra esta perturbación mediante Euler explícito con un paso de tiempo que supere la cota de estabilidad pero sin divergencia inmediata, el factor de amplificación negativo $R = 1 - C \Delta t < -1$ multiplica la perturbación alternando su signo en cada paso:
 
-$$u_{n+1} = R \cdot u_n$$
+$$u_{n+1} = R u_n$$
 
 Esto genera oscilaciones numéricas espurias crecientes que no corresponden a la dinámica biológica real del sistema, evidenciando los límites de los métodos explícitos.

@@ -185,7 +185,7 @@ def main() -> None:
     plt.close(fig)
 
     print("\n" + "=" * 80)
-    print(f"[OK] Gráfico exportado exitosamente a: {out_path}")
+    print(f"Figura guardada en: {out_path}")
     print("=" * 80)
 
 

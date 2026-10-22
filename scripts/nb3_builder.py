@@ -13,25 +13,25 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "# Laboratorio 3: Generacion de Datos Sinteticos y Modelado de Ruido Observacional\n\n"
-            "## 1. Introduccion: El Laboratorio in Silico\n\n"
-            "En la practica de la ciencia de datos aplicada a sistemas dinamicos, rara vez se dispone "
-            "de trayectorias continuas exactas y libres de error. Los registros clinicos y epidemiologicos "
+            "# Laboratorio 3: Generación de Datos Sintéticos y Modelado de Ruido Observacional\n\n"
+            "## 1. Introducción: El Laboratorio in Silico\n\n"
+            "En la práctica de la ciencia de datos aplicada a sistemas dinámicos, rara vez se dispone "
+            "de trayectorias continuas exactas y libres de error. Los registros clínicos y epidemiológicos "
             "se recolectan a intervalos discretos de tiempo (por ejemplo, reportes hospitalarios diarios) "
-            "y estan afectados por diversas fuentes de incertidumbre: errores de muestreo, subnotificacion, "
-            "sensibilidad imperfecta de las pruebas diagnosticas y demoras en el procesamiento de datos.\n\n"
-            "Para desarrollar y validar algoritmos de calibracion e inferencia de parametros (problemas inversos), "
+            "y están afectados por diversas fuentes de incertidumbre: errores de muestreo, subnotificación, "
+            "sensibilidad imperfecta de las pruebas diagnósticas y demoras en el procesamiento de datos.\n\n"
+            "Para desarrollar y validar algoritmos de calibración e inferencia de parámetros (problemas inversos), "
             "es necesario contar con un entorno de prueba controlado: un **laboratorio in silico**. "
-            "En este laboratorio generamos observaciones sinteticas a partir de un modelo mecanistico cuya "
-            "**verdad de campo** (*Ground Truth*) conocemos con precision absoluta. Esto permite cuantificar "
-            "de forma rigurosa la exactitud, robustez y sesgo de los metodos de estimacion.\n\n"
+            "En este laboratorio generamos observaciones sintéticas a partir de un modelo mecanístico cuya "
+            "**verdad de campo** (*Ground Truth*) conocemos con precisión absoluta. Esto permite cuantificar "
+            "de forma rigurosa la exactitud, robustez y sesgo de los métodos de estimación.\n\n"
             "## Objetivos de Aprendizaje\n\n"
             "1. Simular la verdad de campo continua del modelo SIR ($\\beta = 0.4$, $\\gamma = 0.1$) mediante RK45 adaptativo.\n"
-            "2. Implementar el submuestreo temporal discreto en dias enteros $t_k \\in \\{0, 1, 2, \\dots, 50\\}$.\n"
+            "2. Implementar el submuestreo temporal discreto en días enteros $t_k \\in \\{0, 1, 2, \\dots, 50\\}$.\n"
             "3. Modelar el proceso observacional incorporando ruido Gaussiano $\\mathcal{N}(0, \\sigma^2)$ con "
-            "proyeccion a no-negatividad fisica: $I^{\\text{obs}} = \\max(0, I + \\varepsilon)$.\n"
-            "4. Efectuar un analisis estadistico riguroso de los residuos observacionales (media, desviacion estandar, banda $\\pm 2\\sigma$).\n"
-            "5. Visualizar las observaciones clinicas y caracterizar la incertidumbre instrumental."
+            "proyección a no-negatividad física: $I^{\\text{obs}} = \\max(0, I + \\varepsilon)$.\n"
+            "4. Efectuar un análisis estadístico riguroso de los residuos observacionales (media, desviación estándar, banda $\\pm 2\\sigma$).\n"
+            "5. Visualizar las observaciones clínicas y caracterizar la incertidumbre instrumental."
         )
     })
 
@@ -39,7 +39,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "code",
         "source": (
-            "# Celda de configuracion y librerias cientificas\n"
+            "# Celda de configuración y librerías científicas\n"
             "import os\n"
             "os.environ.setdefault(\"MPLCONFIGDIR\", \"/tmp/matplotlib\")\n"
             "from typing import Any\n"
@@ -55,7 +55,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    \"lines.linewidth\": 2.0,\n"
             "    \"grid.alpha\": 0.4\n"
             "})\n\n"
-            "print(\"Configuracion inicial completada.\")"
+            "print(\"Configuración inicial completada.\")"
         )
     })
 
@@ -63,17 +63,17 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "## 2. Generacion de la Verdad de Campo (Ground Truth)\n\n"
+            "## 2. Generación de la Verdad de Campo (Ground Truth)\n\n"
             "Consideramos el sistema continuo SIR:\n\n"
             "$$\\frac{dS}{dt} = -\\beta S I$$\n"
             "$$\\frac{dI}{dt} = \\beta S I - \\gamma I$$\n"
             "$$\\frac{dR}{dt} = \\gamma I$$\n\n"
-            "con parametros nominales verdaderos:\n"
-            "- $\\beta^* = 0.40$ (tasa de transmision)\n"
-            "- $\\gamma^* = 0.10$ (tasa de recuperacion)\n"
+            "con parámetros nominales verdaderos:\n"
+            "- $\\beta^* = 0.40$ (tasa de transmisión)\n"
+            "- $\\gamma^* = 0.10$ (tasa de recuperación)\n"
             "- $R_0^* = \\beta^* / \\gamma^* = 4.00$\n"
             "- Condiciones iniciales: $S(0) = 0.99$, $I(0) = 0.01$, $R(0) = 0.00$\n"
-            "- Horizonte temporal: $T = 50.0$ dias\n\n"
+            "- Horizonte temporal: $T = 50.0$ días\n\n"
             "Generamos la trayectoria continua evaluada en una malla densa con RK45 adaptativo."
         )
     })
@@ -90,7 +90,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    dt_eval: float = 0.005\n"
             ") -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:\n"
             "    \"\"\"\n"
-            "    Genera la solucion continua de referencia (Ground Truth) para el modelo SIR.\n"
+            "    Genera la solución continua de referencia (Ground Truth) para el modelo SIR.\n"
             "    \"\"\"\n"
             "    R0_val = 1.0 - S0 - I0\n"
             "    y0 = np.array([S0, I0, R0_val], dtype=np.float64)\n\n"
@@ -124,9 +124,9 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    dt_eval: float = 0.005\n"
             ") -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:\n"
             "    \"\"\"\n"
-            "    Genera la solucion continua de referencia (Ground Truth) para el modelo SIR.\n"
+            "    Genera la solución continua de referencia (Ground Truth) para el modelo SIR.\n"
             "    \"\"\"\n"
-            "    # TU CODIGO AQUI\n"
+            "    # TU CÓDIGO AQUÍ\n"
             "    ..."
         )
     cells.append({"type": "code", "source": code_gt})
@@ -135,11 +135,11 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "code",
         "source": (
-            "# Pruebas de validacion para generar_verdad_campo\n"
+            "# Pruebas de validación para generar_verdad_campo\n"
             "t_ref, S_ref, I_ref, R_ref = generar_verdad_campo(0.4, 0.1, 0.99, 0.01, 50.0)\n"
             "assert np.isclose(S_ref[0], 0.99) and np.isclose(I_ref[0], 0.01), \"Condiciones iniciales incorrectas.\"\n"
-            "assert np.max(np.abs(S_ref + I_ref + R_ref - 1.0)) < 1e-6, \"Conservacion de masa no satisfecha.\"\n"
-            "print(\"Validacion de generar_verdad_campo: EXITOSA.\")"
+            "assert np.max(np.abs(S_ref + I_ref + R_ref - 1.0)) < 1e-6, \"Conservación de masa no satisfecha.\"\n"
+            "print(\"Validación de generar_verdad_campo: EXITOSA.\")"
         )
     })
 
@@ -147,9 +147,9 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "## 3. Muestreo en Tiempos de Reporte Clinico Discreto\n\n"
-            "En los sistemas de vigilancia epidemiologica, las notificaciones se registran en "
-            "dias enteros: $t_k \\in \\{0, 1, 2, \\dots, 50\\}$. "
+            "## 3. Muestreo en Tiempos de Reporte Clínico Discreto\n\n"
+            "En los sistemas de vigilancia epidemiológica, las notificaciones se registran en "
+            "días enteros: $t_k \\in \\{0, 1, 2, \\dots, 50\\}$. "
             "Interpolar la trayectoria continua de referencia sobre estos puntos discretos produce "
             "la serie temporal libre de ruido, denominada $I^{\\text{clean}}(t_k)$."
         )
@@ -184,7 +184,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    \"\"\"\n"
             "    Submuestrea la serie continua de infectados sobre instantes de tiempo discretos.\n"
             "    \"\"\"\n"
-            "    # TU CODIGO AQUI\n"
+            "    # TU CÓDIGO AQUÍ\n"
             "    ..."
         )
     cells.append({"type": "code", "source": code_sample})
@@ -193,12 +193,12 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "code",
         "source": (
-            "# Pruebas de validacion para muestrear_dias_enteros\n"
+            "# Pruebas de validación para muestrear_dias_enteros\n"
             "t_dias, I_clean = muestrear_dias_enteros(t_ref, I_ref)\n"
             "assert len(t_dias) == 51, f\"Se esperaban 51 puntos diarios (0 a 50), obtenidos {len(t_dias)}\"\n"
             "assert np.isclose(t_dias[0], 0.0) and np.isclose(t_dias[-1], 50.0), \"Los extremos temporales no coinciden.\"\n"
-            "assert np.all(I_clean >= 0.0) and np.all(I_clean <= 1.0), \"Valores fuera del rango fisico [0, 1].\"\n"
-            "print(\"Validacion de muestrear_dias_enteros: EXITOSA.\")"
+            "assert np.all(I_clean >= 0.0) and np.all(I_clean <= 1.0), \"Valores fuera del rango físico [0, 1].\"\n"
+            "print(\"Validación de muestrear_dias_enteros: EXITOSA.\")"
         )
     })
 
@@ -206,15 +206,15 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "## 4. Proceso de Medicion: Ruido Gaussiano y Proyeccion Fisica\n\n"
+            "## 4. Proceso de Medición: Ruido Gaussiano y Proyección Física\n\n"
             "Para modelar el error observacional aditivo, perturbamos las mediciones con variables "
-            "aleatorias normales independientes e identicamente distribuidas:\n\n"
+            "aleatorias normales independientes e idénticamente distribuidas:\n\n"
             "$$\\varepsilon_k \\sim \\mathcal{N}(0, \\sigma^2), \\quad \\sigma = 0.02$$\n\n"
-            "Dado que $I(t)$ representa la proporcion de la poblacion infectada, una observacion "
-            "negativa es fisicamente inadmisible. Imponemos la proyeccion no lineal sobre el conjunto de "
-            "estados validos mediante la operacion de truncamiento inferior:\n\n"
+            "Dado que $I(t)$ representa la proporción de la población infectada, una observación "
+            "negativa es físicamente inadmisible. Imponemos la proyección no lineal sobre el conjunto de "
+            "estados válidos mediante la operación de truncamiento inferior:\n\n"
             "$$I^{\\text{obs}}_k = \\max(0, I^{\\text{clean}}(t_k) + \\varepsilon_k)$$\n\n"
-            "Para garantizar reproducibilidad cientifica estricta, fijamos la semilla del generador pseudoaleatorio."
+            "Para garantizar reproducibilidad científica estricta, fijamos la semilla del generador pseudoaleatorio."
         )
     })
 
@@ -227,7 +227,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    seed: int = 42\n"
             ") -> np.ndarray:\n"
             "    \"\"\"\n"
-            "    Agrega ruido aditivo Gaussiano N(0, sigma^2) con proyeccion a no-negatividad.\n"
+            "    Agrega ruido aditivo Gaussiano N(0, sigma^2) con proyección a no-negatividad.\n"
             "    \"\"\"\n"
             "    I_arr = np.asarray(I_clean, dtype=np.float64)\n"
             "    rng = np.random.default_rng(seed)\n"
@@ -243,9 +243,9 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    seed: int = 42\n"
             ") -> np.ndarray:\n"
             "    \"\"\"\n"
-            "    Agrega ruido aditivo Gaussiano N(0, sigma^2) con proyeccion a no-negatividad.\n"
+            "    Agrega ruido aditivo Gaussiano N(0, sigma^2) con proyección a no-negatividad.\n"
             "    \"\"\"\n"
-            "    # TU CODIGO AQUI\n"
+            "    # TU CÓDIGO AQUÍ\n"
             "    ..."
         )
     cells.append({"type": "code", "source": code_noise})
@@ -254,14 +254,14 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "code",
         "source": (
-            "# Pruebas de validacion para agregar_ruido_gaussiano\n"
+            "# Pruebas de validación para agregar_ruido_gaussiano\n"
             "I_obs_test = agregar_ruido_gaussiano(I_clean, sigma=0.02, seed=42)\n"
             "assert I_obs_test.shape == I_clean.shape, \"La forma del arreglo no coincide.\"\n"
-            "assert np.all(I_obs_test >= 0.0), \"Violacion de no-negatividad fisica.\"\n"
+            "assert np.all(I_obs_test >= 0.0), \"Violación de no-negatividad física.\"\n"
             "# Verificar determinismo mediante semilla fija\n"
             "I_obs_test2 = agregar_ruido_gaussiano(I_clean, sigma=0.02, seed=42)\n"
             "assert np.array_equal(I_obs_test, I_obs_test2), \"El generador debe ser determinista con semilla fija.\"\n"
-            "print(\"Validacion de agregar_ruido_gaussiano: EXITOSA.\")"
+            "print(\"Validación de agregar_ruido_gaussiano: EXITOSA.\")"
         )
     })
 
@@ -269,15 +269,15 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "## 5. Analisis Estadistico de Residuos Observacionales\n\n"
-            "Definimos el residuo observacional en cada instante muestral como la desviacion "
+            "## 5. Análisis Estadístico de Residuos Observacionales\n\n"
+            "Definimos el residuo observacional en cada instante muestral como la desviación "
             "entre el valor observado y el valor real subyacente:\n\n"
             "$$e_k = I^{\\text{obs}}_k - I^{\\text{clean}}(t_k)$$\n\n"
-            "Propiedades estadisticas a verificar:\n"
+            "Propiedades estadísticas a verificar:\n"
             "1. **Media muestral**: $\\bar{e} = \\frac{1}{M} \\sum_{k=1}^M e_k \\approx 0$, "
-            "lo que confirma la ausencia de sesgo sistematico en el proceso de captura.\n"
-            "2. **Desviacion estandar muestral**: $s_e = \\sqrt{\\frac{1}{M-1} \\sum_{k=1}^M (e_k - \\bar{e})^2} \\approx \\sigma = 0.02$.\n"
-            "3. **Banda de confianza $\\pm 2\\sigma$**: Para una distribucion Gaussiana, aproximadamente el $95.4\\%$ "
+            "lo que confirma la ausencia de sesgo sistemático en el proceso de captura.\n"
+            "2. **Desviación estándar muestral**: $s_e = \\sqrt{\\frac{1}{M-1} \\sum_{k=1}^M (e_k - \\bar{e})^2} \\approx \\sigma = 0.02$.\n"
+            "3. **Banda de confianza $\\pm 2\\sigma$**: Para una distribución Gaussiana, aproximadamente el $95.4\\%$ "
             "de las observaciones deben residir dentro del intervalo $[-\\text{2}\\sigma, +\\text{2}\\sigma]$."
         )
     })
@@ -291,7 +291,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    sigma: float = 0.02\n"
             ") -> dict[str, Any]:\n"
             "    \"\"\"\n"
-            "    Calcula los estadisticos descriptivos de los residuos observacionales.\n"
+            "    Calcula los estadísticos descriptivos de los residuos observacionales.\n"
             "    \"\"\"\n"
             "    residuos = np.asarray(I_obs, dtype=np.float64) - np.asarray(I_clean, dtype=np.float64)\n"
             "    media = float(np.mean(residuos))\n"
@@ -313,9 +313,9 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    sigma: float = 0.02\n"
             ") -> dict[str, Any]:\n"
             "    \"\"\"\n"
-            "    Calcula los estadisticos descriptivos de los residuos observacionales.\n"
+            "    Calcula los estadísticos descriptivos de los residuos observacionales.\n"
             "    \"\"\"\n"
-            "    # TU CODIGO AQUI\n"
+            "    # TU CÓDIGO AQUÍ\n"
             "    ..."
         )
     cells.append({"type": "code", "source": code_res})
@@ -324,13 +324,13 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "code",
         "source": (
-            "# Pruebas de validacion para analizar_residuos\n"
+            "# Pruebas de validación para analizar_residuos\n"
             "stats = analizar_residuos(I_clean, I_obs_test, sigma=0.02)\n"
-            "assert isinstance(stats, dict), \"La funcion debe retornar un diccionario.\"\n"
+            "assert isinstance(stats, dict), \"La función debe retornar un diccionario.\"\n"
             "assert \"media\" in stats and \"desviacion_std\" in stats and \"porcentaje_2sigma\" in stats\n"
             "assert abs(stats[\"media\"]) < 0.01, f\"Media residual excesiva: {stats['media']}\"\n"
-            "assert 0.01 < stats[\"desviacion_std\"] < 0.03, f\"Desviacion residual anormal: {stats['desviacion_std']}\"\n"
-            "print(\"Validacion de analizar_residuos: EXITOSA.\")"
+            "assert 0.01 < stats[\"desviacion_std\"] < 0.03, f\"Desviación residual anormal: {stats['desviacion_std']}\"\n"
+            "print(\"Validación de analizar_residuos: EXITOSA.\")"
         )
     })
 
@@ -338,11 +338,11 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
     cells.append({
         "type": "markdown",
         "source": (
-            "## 6. Generacion Completa y Caracterizacion Grafica\n\n"
-            "Ejecutamos el flujo completo de generacion con la semilla $42$ y $\\sigma = 0.02$. "
-            "Construimos dos graficos cientificos:\n"
+            "## 6. Generación Completa y Caracterización Gráfica\n\n"
+            "Ejecutamos el flujo completo de generación con la semilla $42$ y $\\sigma = 0.02$. "
+            "Construimos dos gráficos científicos:\n"
             "1. **Curva de referencia continua frente a las observaciones discretas**, "
-            "incluyendo la banda de dispersion $\\pm 2\\sigma$.\n"
+            "incluyendo la banda de dispersión $\\pm 2\\sigma$.\n"
             "2. **Serie temporal de los residuos**, contrastada contra las bandas de control $\\pm 2\\sigma$."
         )
     })
@@ -357,12 +357,12 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "I_obs = agregar_ruido_gaussiano(I_clean, sigma=sigma, seed=seed)\n"
             "analisis = analizar_residuos(I_clean, I_obs, sigma=sigma)\n\n"
             "print(\"=\" * 65)\n"
-            "print(\"ANALISIS ESTADISTICO DE RESIDUOS OBSERVACIONALES\")\n"
+            "print(\"ANÁLISIS ESTADÍSTICO DE RESIDUOS OBSERVACIONALES\")\n"
             "print(\"=\" * 65)\n"
-            "print(f\"Numero de observaciones discretas: {len(t_dias)}\")\n"
-            "print(f\"Desviacion estandar nominal (sigma): {sigma:.4f}\")\n"
+            "print(f\"Número de observaciones discretas: {len(t_dias)}\")\n"
+            "print(f\"Desviación estándar nominal (sigma): {sigma:.4f}\")\n"
             "print(f\"Media muestral de residuos:        {analisis['media']:+.5f}\")\n"
-            "print(f\"Desviacion estandar muestral (s):  {analisis['desviacion_std']:.5f}\")\n"
+            "print(f\"Desviación estándar muestral (s):  {analisis['desviacion_std']:.5f}\")\n"
             "print(f\"Observaciones en banda +- 2*sigma: {analisis['porcentaje_2sigma']:.1f}% (esperado: ~95.4%)\")\n"
             "print(\"=\" * 65)\n"
         )
@@ -387,11 +387,11 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             ")\n"
             "ax1.scatter(\n"
             "    t_dias, I_obs, color=\"#de2d26\", s=28, facecolors=\"none\", edgecolors=\"#de2d26\",\n"
-            "    linewidths=1.5, label=\"Observaciones Clinicas Sinteticas\", zorder=3\n"
+            "    linewidths=1.5, label=\"Observaciones Clínicas Sintéticas\", zorder=3\n"
             ")\n"
-            "ax1.set_title(\"Serie Temporal: Dinamica Continua vs Observaciones\")\n"
-            "ax1.set_xlabel(\"Tiempo (dias)\")\n"
-            "ax1.set_ylabel(\"Proporcion de Infectados I(t)\")\n"
+            "ax1.set_title(\"Serie Temporal: Dinámica Continua vs Observaciones\")\n"
+            "ax1.set_xlabel(\"Tiempo (días)\")\n"
+            "ax1.set_ylabel(\"Proporción de Infectados I(t)\")\n"
             "ax1.legend(frameon=True, loc=\"upper right\")\n\n"
             "# Panel 2: Serie temporal de residuos con bandas de control\n"
             "ax2 = axes[1]\n"
@@ -404,7 +404,7 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "plt.setp(markerline, markersize=4, color=\"#3182bd\")\n"
             "plt.setp(baseline, linewidth=0.8, color=\"gray\")\n"
             "ax2.set_title(\"Residuos Observacionales: e_k = I_obs - I_clean\")\n"
-            "ax2.set_xlabel(\"Tiempo (dias)\")\n"
+            "ax2.set_xlabel(\"Tiempo (días)\")\n"
             "ax2.set_ylabel(\"Residuo\")\n"
             "ax2.legend(frameon=True, loc=\"upper right\")\n\n"
             "plt.tight_layout()\n"
@@ -417,13 +417,13 @@ def build_nb3_cells(is_solution: bool) -> List[Dict[str, Any]]:
         "type": "markdown",
         "source": (
             "## 7. Lectura Complementaria: Datos Discretos de Conteo\n\n"
-            "En este laboratorio hemos modelado el error mediante ruido Gaussiano continuo y homocedastico. "
+            "En este laboratorio hemos modelado el error mediante ruido Gaussiano continuo y homocedástico. "
             "Sin embargo, en entornos hospitalarios donde se registran conteos enteros de personas (por ejemplo, admisiones diarias), "
-            "la variabilidad del proceso de notificacion es intrinsecamente discreta y heterocedastica: la varianza de los datos "
+            "la variabilidad del proceso de notificación es intrínsecamente discreta y heterocedástica: la varianza de los datos "
             "depende directamente de la magnitud media esperada de los casos.\n\n"
-            "Para los estudiantes interesados en profundizar en el modelado estadistico de conteo mediante "
+            "Para los estudiantes interesados en profundizar en el modelado estadístico de conteo mediante "
             "procesos Poissonianos y verosimilitud de Poisson, se recomienda consultar el documento conceptual de apoyo:\n\n"
-            "[Lectura Complementaria: Modelado de Ruido de Conteo y Distribucion de Poisson](../../appendix/ruido_conteo_poisson.md)"
+            "[Lectura Complementaria: Modelado de Ruido de Conteo y Distribución de Poisson](../../appendix/ruido_conteo_poisson.md)"
         )
     })
 
