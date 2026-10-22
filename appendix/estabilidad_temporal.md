@@ -46,35 +46,57 @@ Para cualquier $\lambda$ con $\text{Re}(\lambda) \le 0$, se cumple que $|R(z)| \
 
 ---
 
-## 3. Deducción del Euler Implícito para el Modelo SIR
+## 3. Deducción Exacta del Euler Implícito para el Modelo SIR
 
-En los modelos epidemiológicos no lineales como el sistema SIR, la aplicación de esquemas implícitos requiere resolver sistemas algebraicos no lineales en cada paso temporal. Consideremos la discretización mediante Euler implícito para la ecuación de los infectados $I(t)$:
+En los modelos epidemiológicos no lineales como el sistema SIR, la aplicación de esquemas implícitos requiere resolver sistemas algebraicos no lineales en cada paso temporal. Consideremos la discretización mediante Euler implícito para las tres variables de estado:
 
-$$\frac{I_{n+1} - I_n}{\Delta t} = \beta S_{n+1} I_{n+1} - \gamma I_{n+1}$$
+$$S_{n+1} = S_n - \Delta t \beta S_{n+1} I_{n+1} \implies S_{n+1} = \frac{S_n}{1 + \Delta t \beta I_{n+1}}$$
+$$I_{n+1} = I_n + \Delta t (\beta S_{n+1} I_{n+1} - \gamma I_{n+1})$$
+$$R_{n+1} = R_n + \Delta t \gamma I_{n+1}$$
 
-En una formulación totalmente implícita estándar, las variables del nuevo paso temporal están acopladas. Para ilustrar la estructura algebraica sin perder generalidad, supongamos que aproximamos la no linealidad del término de infección utilizando el estado susceptible acoplado o una linealización implícita local donde $S_{n+1}$ se aproxima o se mantiene consistente con la conservación de masa. 
+Sumando las ecuaciones de $S$ e $I$ para desacoplar el término no lineal de contagio:
 
-Sustituyendo la relación de conservación de susceptibles $S_{n+1} = S_n - (I_{n+1} - I_n)$ o agrupando los términos no lineales del tipo $\beta I_{n+1}^2$, la ecuación discreta se reorganiza en la forma de una ecuación cuadrática general para la incógnita $I_{n+1}$:
+$$(S_{n+1} - S_n) + (I_{n+1} - I_n) + \Delta t \gamma I_{n+1} = 0 \implies S_{n+1} + I_{n+1}(1 + \Delta t \gamma) - (S_n + I_n) = 0$$
+
+Sustituyendo $S_{n+1} = \frac{S_n}{1 + \Delta t \beta I_{n+1}}$:
+
+$$\frac{S_n}{1 + \Delta t \beta I_{n+1}} + I_{n+1}(1 + \Delta t \gamma) - (S_n + I_n) = 0$$
+
+Multiplicando toda la expresión por el denominador común $(1 + \Delta t \beta I_{n+1})$ y agrupando potencias de $I_{n+1}$, se obtiene de forma exacta la ecuación cuadrática:
 
 $$A \, I_{n+1}^2 + B \, I_{n+1} - I_n = 0$$
 
-donde los coeficientes $A$ y $B$ dependen de los parámetros del modelo ($\beta$, $\gamma$), el paso temporal $\Delta t$ y el estado previo $I_n$ (así como $S_n$). 
+donde los coeficientes están dados explícitamente por:
 
-### Selección de la Raíz Física
+$$A = \Delta t \beta (1 + \Delta t \gamma) > 0$$
+$$B = 1 + \Delta t \gamma - \Delta t \beta (S_n + I_n)$$
+$$C_{\text{cte}} = -I_n \le 0$$
 
-Aplicando la fórmula general para resolver la ecuación cuadrática, obtenemos dos posibles raíces matemáticas:
+### Existencia Incondicional y Selección de la Raíz Física
 
-$$I_{n+1} = \frac{-B \pm \sqrt{B^2 + 4 A I_n}}{2 A}$$
+El discriminante de la ecuación cuadrática es:
 
-Dado que $I_{n+1}$ representa una proporción de individuos infectados, debe ser una cantidad real y no negativa. Analizando los signos de los coeficientes derivados de la dinámica epidemiológica (donde $A > 0$ y el término bajo la raíz garantiza existencia real para pasos de tiempo razonables), la rama con el signo negativo produce valores negativos o incongruentes, mientras que la **única raíz física admisible** es la que selecciona el signo positivo:
+$$\Delta = B^2 - 4 A (-I_n) = B^2 + 4 A I_n$$
+
+Dado que $A > 0$ e $I_n \ge 0$, se cumple de forma incondicional que:
+
+$$\Delta = B^2 + 4 A I_n \ge B^2 \ge 0, \quad \forall \Delta t > 0$$
+
+Por lo tanto, **el discriminante es siempre real y no negativo sin restricción sobre el paso $\Delta t$**. 
+
+Puesto que el producto de las dos raíces es $C_{\text{cte}} / A = -I_n / A \le 0$, existe exactamente una raíz real no negativa (físicamente admisible), dada por:
 
 $$I_{n+1} = \frac{-B + \sqrt{B^2 + 4 A I_n}}{2 A}$$
 
-Este detalle algebraico demuestra por qué la resolución de esquemas implícitos requiere un tratamiento analítico cuidadoso.
+Para evitar la cancelación sustractiva en aritmética de punto flotante cuando $B \ge 0$, se utiliza la formulación equivalente estabilizada:
+
+$$I_{n+1} = \frac{2 I_n}{B + \sqrt{B^2 + 4 A I_n}}$$
+
+Una vez obtenido $I_{n+1}$, se actualizan de inmediato $S_{n+1} = \frac{S_n}{1 + \Delta t \beta I_{n+1}}$ y $R_{n+1} = R_n + \Delta t \gamma I_{n+1}$.
 
 ---
 
-## 4. Conexión con la Ecuación Logística y Oscilaciones Espurias
+## 4. Conexión con la Ecuación Logística: Monotonicidad vs Estabilidad
 
 Consideremos la ecuación logística adimensionalizada:
 
@@ -84,8 +106,7 @@ Linealizando en torno al estado estacionario estable $x^* = 1$ mediante la pertu
 
 $$\dot{u} = -C u$$
 
-Si se integra esta perturbación mediante Euler explícito con un paso de tiempo que supere la cota de estabilidad pero sin divergencia inmediata, el factor de amplificación negativo $R = 1 - C \Delta t < -1$ multiplica la perturbación alternando su signo en cada paso:
-
-$$u_{n+1} = R u_n$$
-
-Esto genera oscilaciones numéricas espurias crecientes que no corresponden a la dinámica biológica real del sistema, evidenciando los límites de los métodos explícitos.
+Aplicando el método de Euler explícito: $u_{n+1} = (1 - C \Delta t) u_n = R(z) u_n$ con $z = -C \Delta t$. Se identifican tres regímenes cualitativos según el paso temporal:
+1. **Régimen Monótono y Estable ($\Delta t < 1/C$):** $0 < R(z) < 1$. La perturbación decrece monótonamente hacia 0 sin oscilaciones, reproduciendo fielmente el comportamiento de la solución continua.
+2. **Régimen con Oscilaciones Espurias Acotadas ($1/C < \Delta t < 2/C$):** $-1 < R(z) < 0$. El factor de amplificación alterna de signo en cada paso, produciendo sobrepasos transitorios de la capacidad de carga ($x > 1$) y oscilaciones numéricas que se amortiguan hacia el equilibrio.
+3. **Régimen Inestable y Divergente ($\Delta t > 2/C$):** $R(z) < -1 \implies |R(z)| > 1$. La perturbación se amplifica geométricamente en cada paso con alternancia de signo, causando divergencia numérica y el colapso de la simulación.

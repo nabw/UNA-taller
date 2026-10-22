@@ -257,7 +257,7 @@ def plot_synthetic_observations(
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
     Grafica la curva real de infectados junto con las observaciones sintéticas
-    perturbadas por ruido Gaussiano (y opcionalmente Poisson).
+    perturbadas por ruido gaussiano (y opcionalmente ruido de Poisson).
 
     Parámetros
     ----------
@@ -266,9 +266,9 @@ def plot_synthetic_observations(
     I_clean : np.ndarray
         Vector 1D de infectados sin ruido (referencia continua).
     I_gauss : np.ndarray
-        Vector 1D de observaciones con ruido Gaussiano proyectado.
+        Vector 1D de observaciones con ruido gaussiano proyectado.
     I_poiss : np.ndarray, opcional
-        Vector 1D de observaciones con ruido Poisson discreto escalado (opcional).
+        Vector 1D de observaciones con ruido de Poisson discreto escalado (opcional).
 
     Retorna
     -------
@@ -289,7 +289,7 @@ def plot_synthetic_observations(
         zorder=3
     )
 
-    # Observaciones con ruido Gaussiano
+    # Observaciones con ruido gaussiano
     ax.scatter(
         t_obs, I_gauss,
         color="#1f77b4",
@@ -297,11 +297,11 @@ def plot_synthetic_observations(
         marker="o",
         s=40,
         alpha=0.75,
-        label="Observaciones con ruido Gaussiano",
+        label="Observaciones con ruido gaussiano",
         zorder=4
     )
 
-    # Observaciones con ruido Poisson (si se proporcionan)
+    # Observaciones con ruido de Poisson (si se proporcionan)
     if I_poiss is not None:
         ax.scatter(
             t_obs, I_poiss,
@@ -310,7 +310,7 @@ def plot_synthetic_observations(
             marker="^",
             s=45,
             alpha=0.75,
-            label="Ruido Poisson (Casos / $N_{pop}$)",
+            label="Ruido de Poisson (Casos / $N_{pop}$)",
             zorder=5
         )
 

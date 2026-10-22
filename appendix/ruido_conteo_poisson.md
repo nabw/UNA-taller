@@ -1,6 +1,6 @@
 # Apéndice Teórico: Ruido de Conteo y Distribución de Poisson en Modelos Epidemiológicos
 
-## 1. Limitaciones del Ruido Gaussiano Aditivo
+## 1. Limitaciones del ruido gaussiano aditivo
 
 En los modelos fenomenológicos iniciales, es común simular la incertidumbre observacional añadiendo ruido gaussiano aditivo a las trayectorias deterministas:
 
@@ -69,5 +69,7 @@ Este enfoque otorga el mismo peso estadístico a todos los puntos de la serie te
 Para reflejar correctamente la naturaleza estocástica de los conteos, se formula la función de verosimilitud basada en la distribución de Poisson. La función de log-verosimilitud negativa (o *Poisson Negative Log-Likelihood*), omitiendo constantes independientes de los parámetros, se expresa como:
 
 $$\ell(\theta) = - \sum_{k} \left[ C_k \ln(\lambda_k(\theta)) - \lambda_k(\theta) \right]$$
+
+> **Nota de implementación computacional:** Si $\lambda_k(\theta) \to 0$ al inicio del brote, el término $\ln(\lambda_k)$ tiende a $-\infty$. En código científico se aplica una regularización numérica acotando inferiormente la tasa (por ejemplo, con `np.maximum(lambda_k, 1e-12)` o sumando una constante pequeña $\epsilon > 0$).
 
 Al maximizar esta verosimilitud (o minimizar la deviance estadística asociada), las observaciones con menores conteos (menor $\lambda_k$) reciben una ponderación inversa adecuada a su menor varianza, mientras que las discrepancias relativas en zonas de alta incidencia son evaluadas con el rigor probabilístico correcto, mejorando la robustez y la consistencia estadística de la calibración del modelo.

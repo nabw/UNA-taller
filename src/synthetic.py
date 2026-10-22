@@ -3,7 +3,7 @@ Módulo de generación de datos sintéticos y ruido para el modelo SIR.
 
 Permite simular la trayectoria epidemiológica "verdadera" de referencia (Ground Truth)
 con algoritmos de alta precisión (RK45) y perturbar las observaciones mediante
-ruido Gaussiano y ruido Poisson para modelar incertidumbre observacional real.
+ruido gaussiano y ruido de Poisson para modelar incertidumbre observacional real.
 
 Universidad Nacional (UNA), Costa Rica.
 Carrera de Ingeniería Matemática en Ciencia de Datos.
@@ -132,7 +132,7 @@ def add_gaussian_noise(
     seed: Optional[int] = 42
 ) -> np.ndarray:
     """
-    Añade ruido aditivo Gaussiano homocedástico N(0, sigma^2) a las observaciones
+    Añade ruido aditivo gaussiano homocedástico N(0, sigma^2) a las observaciones
     de infectados, asegurando la no-negatividad física mediante proyección truncada.
 
         I_{noisy} = max(0, I_{obs} + epsilon),   epsilon ~ N(0, sigma^2)
@@ -142,14 +142,14 @@ def add_gaussian_noise(
     I_obs : np.ndarray
         Vector 1D de observaciones limpias de infectados.
     sigma : float, opcional
-        Desviación estándar del ruido Gaussiano (por defecto 0.02).
+        Desviación estándar del ruido gaussiano (por defecto 0.02).
     seed : int, opcional
         Semilla para el generador pseudoaleatorio de NumPy (por defecto 42).
 
     Retorna
     -------
     np.ndarray
-        Vector 1D de observaciones con ruido Gaussiano proyectadas a R_{>=0}.
+        Vector 1D de observaciones con ruido gaussiano proyectadas a R_{>=0}.
     """
     I_obs = np.asarray(I_obs, dtype=np.float64)
     rng = np.random.default_rng(seed)
@@ -164,7 +164,7 @@ def add_poisson_noise(
     seed: Optional[int] = 42
 ) -> np.ndarray:
     """
-    Añade ruido de conteo Poissoniano escalado a una población total N_pop.
+    Añade ruido de conteo poissoniano escalado a una población total N_pop.
 
     Este modelo estadístico refleja el proceso generativo discreto de notificación
     de casos clínicos en epidemiología:

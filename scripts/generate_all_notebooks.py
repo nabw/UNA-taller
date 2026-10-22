@@ -9,9 +9,9 @@ Produce los 4 cuadernos en dos versiones (estudiante y solucion):
 
 Requisitos estrictos:
 - Cero emojis.
-- Cero explicaciones de complejidad algoritmica (sin Big-O).
+- Cero explicaciones de complejidad algorítmica (sin Big-O).
 - Autocontenidos (importaciones completas, funciones auxiliares incluidas).
-- Formato nbformat 4.5 valido.
+- Formato nbformat 4.5 válido.
 """
 
 import os
@@ -42,7 +42,7 @@ from scripts.nb4_builder import build_nb4_cells
 
 
 def check_no_emojis(text: str) -> None:
-    """Verifica que el texto no contenga emojis ni simbolos pictograficos."""
+    """Verifica que el texto no contenga emojis ni símbolos pictográficos."""
     for char in text:
         cp = ord(char)
         if (
@@ -129,7 +129,7 @@ def add_colab_badge(nb_cells: List[Dict[str, Any]], subfolder: str, filename: st
 
 def execute_notebook_cells(cells: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Ejecuta las celdas de codigo en un espacio de nombres compartido,
+    Ejecuta las celdas de código en un espacio de nombres compartido,
     capturando stdout y figuras de matplotlib en formato display_data PNG.
     """
     namespace: Dict[str, Any] = {}

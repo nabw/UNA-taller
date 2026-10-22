@@ -54,40 +54,33 @@ def loss_function(
     Retorna
     -------
     float
-        Valor de la pérdida cuadrática L(theta). Si beta <= 0 o gamma <= 0,
-        o si la simulación numérica diverge/inestabiliza, retorna 1e6 como penalización.
+        Valor de la pérdida cuadrática L(theta). Lanza ValueError si beta <= 0
+        o gamma <= 0 (parámetros no físicos).
     """
     beta, gamma = float(theta[0]), float(theta[1])
 
-    # Penalización dura por violación de positividad física
-    PENALTY = 1e6
     if beta <= 0.0 or gamma <= 0.0:
-        return PENALTY
+        raise ValueError(
+            f"Parámetros no físicos: beta={beta:.4e}, gamma={gamma:.4e}. "
+            "Deben ser estrictamente positivos."
+        )
 
     t_obs = np.asarray(t_obs, dtype=np.float64)
     I_obs = np.asarray(I_obs, dtype=np.float64)
     T_final = float(t_obs[-1])
 
     solver_key = solver_name.lower().strip()
-    try:
-        if solver_key == "imex":
-            t_sim, _, I_sim, _ = solve_sir_imex(S0, I0, beta, gamma, dt=dt_sim, T=T_final)
-        elif solver_key in ("explicit", "euler"):
-            t_sim, _, I_sim, _ = solve_sir_explicit(S0, I0, beta, gamma, dt=dt_sim, T=T_final)
-        elif solver_key == "implicit":
-            t_sim, _, I_sim, _ = solve_sir_implicit(S0, I0, beta, gamma, dt=dt_sim, T=T_final)
-        else:
-            raise ValueError(
-                f"Solver desconocido: '{solver_name}'. "
-                "Opciones válidas: 'imex', 'explicit', 'implicit'."
-            )
-    except Exception:
-        # En caso de fallo numérico durante la integración
-        return PENALTY
-
-    # Verificación de estabilidad y valores válidos
-    if np.any(np.isnan(I_sim)) or np.any(np.isinf(I_sim)) or np.any(I_sim < -1e-3) or np.any(I_sim > 2.0):
-        return PENALTY
+    if solver_key == "imex":
+        t_sim, _, I_sim, _ = solve_sir_imex(S0, I0, beta, gamma, dt=dt_sim, T=T_final)
+    elif solver_key in ("explicit", "euler"):
+        t_sim, _, I_sim, _ = solve_sir_explicit(S0, I0, beta, gamma, dt=dt_sim, T=T_final)
+    elif solver_key == "implicit":
+        t_sim, _, I_sim, _ = solve_sir_implicit(S0, I0, beta, gamma, dt=dt_sim, T=T_final)
+    else:
+        raise ValueError(
+            f"Solver desconocido: '{solver_name}'. "
+            "Opciones válidas: 'imex', 'explicit', 'implicit'."
+        )
 
     # Interpolar la solución numérica sobre los tiempos exactos de observación
     I_interp = np.interp(t_obs, t_sim, I_sim)
@@ -95,9 +88,6 @@ def loss_function(
     # Suma de residuos al cuadrado
     residuals = I_interp - I_obs
     loss = float(np.sum(residuals ** 2))
-
-    if np.isnan(loss) or np.isinf(loss):
-        return PENALTY
 
     return loss
 

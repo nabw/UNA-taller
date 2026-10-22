@@ -165,10 +165,9 @@ def solve_logistic_implicit(
                 x[n + 1] = xn
             else:
                 disc = b * b + 4.0 * a * xn
-                # Raíz numéricamente estable (evita cancelación si b > 0)
-                denom = b + np.sqrt(np.maximum(0.0, disc))
-                if denom > 0.0:
-                    x[n + 1] = 2.0 * xn / denom
+                # Raíz numéricamente estable (evita cancelación sustractiva según el signo de b)
+                if b >= 0.0:
+                    x[n + 1] = 2.0 * xn / (b + np.sqrt(np.maximum(0.0, disc)))
                 else:
                     x[n + 1] = (-b + np.sqrt(np.maximum(0.0, disc))) / (2.0 * a)
 

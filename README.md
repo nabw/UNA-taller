@@ -65,8 +65,21 @@ En la carpeta `appendix/` se incluyen documentos teóricos y prácticos compleme
 - **[Método de Runge-Kutta y SciPy](appendix/runge_kutta_scipy.md):** Formulación algebraica de RK4, tasa de convergencia de orden 4 y ejemplos prácticos de uso de `scipy.integrate.solve_ivp` para modelos 1D y sistemas 2D.
 - **[Resolución de Ecuaciones No Lineales](appendix/solucion_no_lineal_scipy.md):** Formulación de problemas de raíz en integración implícita y arquetipo de resolución con `scipy.optimize.root`.
 - **[Interpolación de Datos en Python](appendix/interpolacion_datos.md):** Métodos de submuestreo y alineamiento temporal con `np.interp` y splines cúbicos de SciPy.
+- **[Optimización con Nelder-Mead en SciPy](appendix/optimizacion_nelder_mead.md):** Fundamento geométrico del algoritmo símplex, optimización libre de derivadas y arquetipo con `scipy.optimize.minimize` y registro de trayectoria vía callback.
 - **[Guía de Vectorización en NumPy](appendix/vectorizacion_numpy.md):** Fundamentos prácticos sobre prealocación en memoria contigua de C, eliminación de verificaciones del intérprete y operaciones en bloques.
 - **[Ruido de Conteo y Distribución de Poisson](appendix/ruido_conteo_poisson.md):** Justificación matemática de por qué el ruido Gaussiano es solo una aproximación inicial y detalles del modelo de Poisson para conteos epidemiológicos discretos.
+
+---
+
+## Documentación y Referencias de SciPy
+
+Para profundizar en la implementación y opciones avanzadas de las rutinas numéricas de SciPy empleadas en los laboratorios, puedes consultar la documentación oficial:
+
+- **Integración de EDOs:** [`scipy.integrate.solve_ivp`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html) — Integración de problemas de valor inicial con métodos adaptativos (RK45, Radau, BDF).
+- **Optimización y Calibración:** [`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) — Minimización multivariada con el algoritmo libre de derivadas de Nelder-Mead (`method="Nelder-Mead"`).
+- **Resolución de Ecuaciones No Lineales:** [`scipy.optimize.root`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root.html) — Búsqueda de raíces vectoriales para esquemas temporales implícitos con métodos híbridos de Powell.
+- **Interpolación 1D y Splines:** [`scipy.interpolate.CubicSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html) — Interpolación continua suave para remuestreo y alineamiento temporal.
+- **Estadística y Distribuciones:** [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) — Modelado probabilístico, análisis descriptivo de residuos y distribución de Poisson.
 
 ---
 
@@ -91,6 +104,7 @@ UNA-taller/
 │   ├── runge_kutta_scipy.md           # Formulación algebraica de RK4 y solve_ivp
 │   ├── solucion_no_lineal_scipy.md    # Ecuaciones no lineales implícitas con SciPy
 │   ├── interpolacion_datos.md         # Submuestreo e interpolación con NumPy y SciPy
+│   ├── optimizacion_nelder_mead.md    # Optimización símplex libre de derivadas con SciPy
 │   ├── vectorizacion_numpy.md         # Rendimiento y memoria en NumPy
 │   └── ruido_conteo_poisson.md        # Comparación teórica de ruido Gaussiano vs Poisson
 ├── notebooks/                         # Cuadernos interactivos Jupyter
@@ -106,5 +120,13 @@ UNA-taller/
 │       └── 04_calibracion_problema_inverso.ipynb
 ├── requirements.txt                   # Dependencias científicas
 ├── pyproject.toml                     # Configuración de paquete pip
+├── AI_DISCLOSURE.md                   # Declaración de uso de Inteligencia Artificial
 └── README.md                          # Guía del taller
 ```
+
+---
+
+## Declaración de Uso de IA
+
+Todo el material de este repositorio fue generado utilizando **Gemini Flash 3.8**. Para más detalles, consulta el archivo [AI_DISCLOSURE.md](file:///home/nico/clases/UNA-taller/AI_DISCLOSURE.md).
+
