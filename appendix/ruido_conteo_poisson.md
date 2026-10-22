@@ -10,7 +10,7 @@ Aunque este enfoque es útil desde el punto de vista pedagógico por su simplici
 
 1. **Variables continuas sobre la recta real:** La distribución normal asigna probabilidad no nula a cualquier valor en $(-\infty, \infty)$. Sin embargo, los casos de infección son necesariamente cantidades enteras no negativas.
 2. **Valores negativos:** Con desviaciones estándar moderadas o altas ($\sigma$), el modelo estocástico puede generar proporciones o conteos negativos, lo que obliga a aplicar truncamientos artificiales (por ejemplo, recortar en cero) que deforman la distribución estadística.
-3. **Homocedasticidad artificial:** El ruido gaussiano estándar asume que la varianza $\sigma^2$ es constante e independiente de la magnitud del brote. En la práctica, los datos de conteo muestran mayor variabilidad absoluta en los picos epidémicos y menor variabilidad en los periodos de baja incidencia.
+3. **Homocedasticidad artificial:** El ruido gaussiano estándar asume que la varianza $\sigma^2$ es constante e independiente de la magnitud del brote. En la práctica, los datos de conteo muestran mayor variabilidad absoluta en los peaks epidémicos y menor variabilidad en los periodos de baja incidencia.
 
 ---
 
@@ -24,7 +24,7 @@ $$C_k \sim \text{Poisson}(\lambda_k)$$
 
 donde el parámetro de tasa $\lambda_k$ está determinado por la proporción de infectados predicha por el modelo determinista y el tamaño poblacional:
 
-$$\lambda_k = N_{\text{pop}} \, I(t_k)$$
+$$\lambda_k = N_{\text{pop}} \cdot I(t_k)$$
 
 ### Propiedades Fundamentales
 
@@ -63,7 +63,7 @@ El método de Mínimos Cuadrados Ordinarios minimiza la suma de errores cuadrát
 
 $$\mathcal{L}_{\text{MCO}} = \sum_{k} \left( I_{\text{obs}}(t_k) - I_{\text{mod}}(t_k) \right)^2$$
 
-Este enfoque otorga el mismo peso estadístico a todos los puntos de la serie temporal, tratando de igual manera los datos en las colas (con baja variabilidad y alta precisión relativa) y los puntos cercanos al pico (con mayor varianza natural). Esto genera estimaciones sesgadas de los parámetros epidemiológicos.
+Este enfoque otorga el mismo peso estadístico a todos los puntos de la serie temporal, tratando de igual manera los datos en las colas (con baja variabilidad y alta precisión relativa) y los puntos cercanos al peak (con mayor varianza natural). Esto genera estimaciones sesgadas de los parámetros epidemiológicos.
 
 ### Verosimilitud de Poisson y Deviance
 Para reflejar correctamente la naturaleza estocástica de los conteos, se formula la función de verosimilitud basada en la distribución de Poisson. La función de log-verosimilitud negativa (o *Poisson Negative Log-Likelihood*), omitiendo constantes independientes de los parámetros, se expresa como:

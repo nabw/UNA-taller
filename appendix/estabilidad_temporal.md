@@ -70,7 +70,7 @@ Dado que $I_{n+1}$ representa una proporción de individuos infectados, debe ser
 
 $$I_{n+1} = \frac{-B + \sqrt{B^2 + 4 A I_n}}{2 A}$$
 
-Este detalle algebraico demuestra por qué la resolución de esquemas implícitos requiere un tratamiento analítico cuidadoso que se relega a este apéndice para mantener la claridad y agilidad en el cuaderno práctico principal.
+Este detalle algebraico demuestra por qué la resolución de esquemas implícitos requiere un tratamiento analítico cuidadoso.
 
 ---
 
@@ -86,6 +86,6 @@ $$\dot{u} = -C u$$
 
 Si se integra esta perturbación mediante Euler explícito con un paso de tiempo que supere la cota de estabilidad pero sin divergencia inmediata, el factor de amplificación negativo $R = 1 - C \Delta t < -1$ multiplica la perturbación alternando su signo en cada paso:
 
-$$u_{n+1} = R \, u_n$$
+$$u_{n+1} = R \cdot u_n$$
 
 Esto genera oscilaciones numéricas espurias crecientes que no corresponden a la dinámica biológica real del sistema, evidenciando los límites de los métodos explícitos.
