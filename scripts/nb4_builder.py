@@ -24,19 +24,18 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "generativos $\\theta = (\\beta, \\gamma)$ que mejor describe los datos observados.\n\n"
             "### El Fenómeno del Sesgo de Discretización (Discretization Bias)\n\n"
             "Todo algoritmo de calibración optimiza los parámetros evaluando repetidamente un simulador numérico hacia adelante. "
-            "Si este simulador utiliza un esquema con un paso temporal finito $\\Delta t$, el integrador comete un error de "
-            "truncamiento local. Durante el proceso de ajuste, el optimizador compensa de forma artificial los defectos "
-            "del integrador numérico, desplazando los estimadores $\\hat{\\beta}(\\Delta t)$ y $\\hat{\\gamma}(\\Delta t)$ "
-            "lejos de sus valores verdaderos continuos $\\beta^*$ y $\\gamma^*$. "
-            "Este sesgo sistemático no proviene del ruido de los datos, sino estrictamente de la aproximación numérica "
-            "de las derivadas continuas.\n\n"
+            "Para estudiar y evidenciar con rigor este fenómeno, es indispensable utilizar un método numérico con **paso temporal "
+            "$\\Delta t$ controlado** (como el integrador IMEX conservativo del Laboratorio 2), en lugar de un resolvedor adaptativo "
+            "de paso variable. Al controlar directamente el valor de $\\Delta t$, podemos cuantificar cómo el error de truncamiento "
+            "numérico del simulador es compensado artificialmente por el optimizador, desplazando los estimadores $\\hat{\\beta}(\\Delta t)$ "
+            "y $\\hat{\\gamma}(\\Delta t)$ lejos de sus valores verdaderos continuos $\\beta^*$ y $\\gamma^*$.\n\n"
             "## Objetivos de Aprendizaje\n\n"
-            "1. Formular computacionalmente la función de pérdida por mínimos cuadrados $L(\\beta, \\gamma)$.\n"
+            "1. Formular computacionalmente la función de pérdida por mínimos cuadrados $L(\\beta, \\gamma)$ con simulación e interpolación.\n"
             "2. Explorar y mapear la superficie de pérdida bidimensional mediante un gráfico de contornos.\n"
             "3. Implementar la calibración de parámetros utilizando el algoritmo Nelder-Mead y registrar la trayectoria del símplex.\n"
             "4. Ejecutar un experimento controlado evaluando $\\Delta t \\in [0.05, 0.10, 0.25, 0.50, 0.80, 1.00, 1.50]$ "
             "para cuantificar rigurosamente el sesgo de discretización sobre $\\hat{\\beta}$ y $\\hat{R}_0$.\n"
-            "5. Analizar el impacto de este sesgo numérico en la toma de decisiones de salud pública (umbral de vacunación)."
+            "5. Analizar el impacto de este sesgo numérico en la toma de decisiones de salud pública y realizar el cierre metodológico del taller."
         )
     })
 
@@ -113,7 +112,7 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
         )
     })
 
-    # Celda 3: Markdown - Función de Pérdida
+    # Celda 3: Markdown - Función de Pérdida y Flujo de Cálculo
     cells.append({
         "type": "markdown",
         "source": (
@@ -122,11 +121,31 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "cuadrática entre la solución numérica simulada $I^{\\text{sim}}(t_k; \\theta)$ y las "
             "observaciones clínicas $I^{\\text{obs}}_k$:\n\n"
             "$$L(\\beta, \\gamma) = \\sum_{k=0}^M \\left( I^{\\text{sim}}(t_k; \\beta, \\gamma) - I^{\\text{obs}}_k \\right)^2$$\n\n"
-            "### Restricción de Positividad Física\n\n"
-            "En epidemiología matemática, las tasas de transmisión y recuperación deben ser estrictamente positivas "
-            "($\\beta > 0$ y $\\gamma > 0$). Para preservar esta condición en optimizadores sin restricciones de caja, "
-            "asignamos una penalización severa ($10^6$) a cualquier configuración paramétrica con valores no positivos "
-            "o que induzca divergencias numéricas."
+            "### Flujo de Cálculo de la Función de Pérdida\n\n"
+            "El cómputo sigue una secuencia de tres etapas lógicas directas:\n"
+            "1. **Validación de parámetros**: Verificar que $\\beta > 0$ y $\\gamma > 0$. Si se reciben valores no positivos, "
+            "la función debe lanzar un `ValueError` (los parámetros físicos y epidemiológicos deben ser estrictamente positivos; "
+            "el optimizador debe operar sobre configuraciones admisibles).\n"
+            "2. **Simulación temporal**: A partir de $(\\beta, \\gamma)$, simular la trayectoria hacia adelante usando el integrador "
+            "`sir_imex_integrador` con el paso temporal $\\Delta t_{\\text{sim}}$ hasta $T = t_{\\text{obs}}[-1]$:\n"
+            "   ```python\n"
+            "   t_sim, _, I_sim, _ = sir_imex_integrador(beta, gamma, dt_sim, T_final, S0, I0)\n"
+            "   ```\n"
+            "3. **Interpolación y cálculo del error**: Interpolar la trayectoria simulada sobre los instantes de observación $t_{\\text{obs}}$ "
+            "y calcular la suma de residuos cuadráticos:\n"
+            "   ```python\n"
+            "   I_interp = np.interp(t_obs, t_sim, I_sim)\n"
+            "   loss = float(np.sum((I_interp - I_obs) ** 2))\n"
+            "   ```\n\n"
+            "### Especificación de la Función a Implementar\n"
+            "- **Nombre**: `funcion_perdida(theta, t_obs, I_obs, dt_sim=0.10, S0=0.99, I0=0.01)`\n"
+            "- **Parámetros de entrada**:\n"
+            "  - `theta`: vector o lista de 2 elementos `[beta, gamma]`.\n"
+            "  - `t_obs: np.ndarray`: arreglo 1D con los instantes temporales de las observaciones.\n"
+            "  - `I_obs: np.ndarray`: arreglo 1D con las observaciones clínicas ruidosas.\n"
+            "  - `dt_sim: float = 0.10`: paso temporal del integrador IMEX hacia adelante.\n"
+            "  - `S0: float = 0.99, I0: float = 0.01`: condiciones iniciales de simulación.\n"
+            "- **Salida esperada**: Un número escalar `float` con el valor de la pérdida $L(\\beta, \\gamma)$."
         )
     })
 
@@ -145,19 +164,14 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "    Calcula la suma de errores cuadráticos entre la simulación SIR y las observaciones.\n"
             "    \"\"\"\n"
             "    beta, gamma = float(theta[0]), float(theta[1])\n"
-            "    PENALIZACION = 1e6\n\n"
             "    if beta <= 0.0 or gamma <= 0.0:\n"
-            "        return PENALIZACION\n\n"
+            "        raise ValueError(f\"Parámetros no físicos: beta={beta}, gamma={gamma} deben ser estrictamente positivos.\")\n\n"
             "    T_final = float(t_obs[-1])\n"
             "    t_sim, _, I_sim, _ = sir_imex_integrador(beta, gamma, dt_sim, T_final, S0, I0)\n\n"
-            "    if np.any(np.isnan(I_sim)) or np.any(np.isinf(I_sim)) or np.any(I_sim < -1e-3) or np.any(I_sim > 2.0):\n"
-            "        return PENALIZACION\n\n"
             "    # Interpolar sobre los tiempos de observación\n"
             "    I_interp = np.interp(t_obs, t_sim, I_sim)\n"
             "    residuos = I_interp - I_obs\n"
-            "    loss = float(np.sum(residuos ** 2))\n\n"
-            "    if np.isnan(loss) or np.isinf(loss):\n"
-            "        return PENALIZACION\n\n"
+            "    loss = float(np.sum(residuos ** 2))\n"
             "    return loss"
         )
     else:
@@ -185,10 +199,18 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "# Pruebas de validación para funcion_perdida\n"
             "loss_true = funcion_perdida([0.4, 0.1], t_obs, I_obs, dt_sim=0.10)\n"
             "assert isinstance(loss_true, float), \"La pérdida debe retornar un número float.\"\n"
-            "assert loss_true < 0.1, f\"La pérdida en los parámetros verdaderos debe ser pequeña, obtenida: {loss_true}\"\n"
-            "# Verificar penalización ante parámetros inválidos\n"
-            "assert funcion_perdida([-0.1, 0.1], t_obs, I_obs) == 1e6, \"Parámetro beta negativo debe ser penalizado.\"\n"
-            "assert funcion_perdida([0.4, -0.05], t_obs, I_obs) == 1e6, \"Parámetro gamma negativo debe ser penalizado.\"\n"
+            "assert loss_true < 0.1, f\"La pérdida en los parámetros verdaderos debe ser pequeña, obtenida: {loss_true}\"\n\n"
+            "# Verificar que parámetros no positivos lanzan ValueError\n"
+            "try:\n"
+            "    funcion_perdida([-0.1, 0.1], t_obs, I_obs)\n"
+            "    assert False, \"Debió lanzar ValueError ante beta no positivo.\"\n"
+            "except ValueError:\n"
+            "    pass\n\n"
+            "try:\n"
+            "    funcion_perdida([0.4, -0.05], t_obs, I_obs)\n"
+            "    assert False, \"Debió lanzar ValueError ante gamma no positivo.\"\n"
+            "except ValueError:\n"
+            "    pass\n\n"
             "print(f\"Validación de funcion_perdida: EXITOSA (pérdida en theta*: {loss_true:.5f}).\")"
         )
     })
@@ -198,10 +220,18 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
         "type": "markdown",
         "source": (
             "## 3. Mapeo del Paisaje de Pérdida (Rejilla Bidimensional)\n\n"
-            "Para analizar la convexidad local y la correlación entre parámetros, evaluamos "
-            "la función de costo sobre una rejilla regular de prueba en el plano $(\\beta, \\gamma)$:\n"
+            "Para analizar la convexidad local, la presencia de valles y la correlación entre parámetros, "
+            "evaluamos la función de costo sobre una rejilla regular de prueba en el plano $(\\beta, \\gamma)$:\n"
             "- $\\beta \\in [0.20, 0.60]$\n"
-            "- $\\gamma \\in [0.03, 0.20]$"
+            "- $\\gamma \\in [0.04, 0.20]$\n\n"
+            "### Especificación de la Función a Implementar\n"
+            "- **Nombre**: `evaluar_malla_perdida(beta_vals, gamma_vals, t_obs, I_obs, dt_sim=0.10, S0=0.99, I0=0.01)`\n"
+            "- **Parámetros de entrada**:\n"
+            "  - `beta_vals: np.ndarray`: arreglo 1D con los valores de $\\beta$ (longitud $N_\\beta$).\n"
+            "  - `gamma_vals: np.ndarray`: arreglo 1D con los valores de $\\gamma$ (longitud $N_\\gamma$).\n"
+            "  - `t_obs, I_obs, dt_sim, S0, I0`: argumentos pasados a `funcion_perdida`.\n"
+            "- **Salida esperada**: Arreglo 2D (`np.ndarray`) de dimensiones $(N_\\gamma, N_\\beta)$ donde el elemento `[i, j]` "
+            "contiene la pérdida $L(\\beta_j, \\gamma_i)$."
         )
     })
 
@@ -249,29 +279,59 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
         )
     cells.append({"type": "code", "source": code_grid})
 
-    # Celda 8: Código - Pruebas unitarias evaluar_malla_perdida
+    # Celda 8: Código - Pruebas unitarias Y GRAFICACIÓN del paisaje de pérdida
     cells.append({
         "type": "code",
         "source": (
-            "# Pruebas de validación para evaluar_malla_perdida\n"
-            "b_test = np.linspace(0.3, 0.5, 3)\n"
-            "g_test = np.linspace(0.08, 0.12, 3)\n"
-            "grid_test = evaluar_malla_perdida(b_test, g_test, t_obs, I_obs, dt_sim=0.20)\n"
-            "assert grid_test.shape == (3, 3), f\"Forma esperada (3, 3), obtenida {grid_test.shape}\"\n"
-            "assert np.all(grid_test >= 0.0), \"Todos los valores de pérdida deben ser positivos.\"\n"
-            "print(\"Validación de evaluar_malla_perdida: EXITOSA.\")"
+            "# Pruebas de validación y visualización gráfica del paisaje de pérdida\n"
+            "b_grid = np.linspace(0.20, 0.60, 41)\n"
+            "g_grid = np.linspace(0.04, 0.20, 41)\n"
+            "L_map = evaluar_malla_perdida(b_grid, g_grid, t_obs, I_obs, dt_sim=0.10)\n\n"
+            "assert L_map.shape == (len(g_grid), len(b_grid)), f\"Forma esperada ({len(g_grid)}, {len(b_grid)}), obtenida {L_map.shape}\"\n"
+            "assert np.all(L_map >= 0.0), \"Todos los valores de pérdida deben ser positivos.\"\n\n"
+            "# Graficar de inmediato el mapa de contornos de la superficie de pérdida\n"
+            "fig, ax = plt.subplots(figsize=(7.5, 5.5))\n"
+            "B_mesh, G_mesh = np.meshgrid(b_grid, g_grid)\n"
+            "levels = np.geomspace(np.min(L_map) + 1e-4, np.max(L_map), 25)\n"
+            "cs = ax.contourf(B_mesh, G_mesh, L_map, levels=levels, cmap=\"viridis_r\", alpha=0.9)\n"
+            "cbar = fig.colorbar(cs, ax=ax)\n"
+            "cbar.set_label(\"Pérdida Cuadrática L(beta, gamma)\")\n"
+            "ax.scatter([0.40], [0.10], color=\"#2ca02c\", s=140, marker=\"*\", edgecolor=\"black\", label=\"Verdad de Campo: theta* = (0.40, 0.10)\", zorder=4)\n"
+            "ax.set_title(\"Paisaje de la Función de Pérdida L(beta, gamma)\")\n"
+            "ax.set_xlabel(\"Tasa de transmisión beta\")\n"
+            "ax.set_ylabel(\"Tasa de recuperación gamma\")\n"
+            "ax.legend(frameon=True, loc=\"upper left\")\n"
+            "plt.tight_layout()\n"
+            "plt.show()\n\n"
+            "print(\"Validación y graficación de evaluar_malla_perdida: EXITOSA.\")"
         )
     })
 
-    # Celda 9: Markdown - Calibración con Nelder-Mead
+    # Celda 9: Markdown - Calibración con Nelder-Mead y Apéndice
     cells.append({
         "type": "markdown",
         "source": (
             "## 4. Calibración con el Algoritmo Símplex de Nelder-Mead\n\n"
             "El algoritmo de Nelder-Mead (1965) es un método de optimización heurístico libre de derivadas. "
             "En cada iteración, actualiza dinámicamente un polígono de $d+1$ vértices en $\\mathbb{R}^d$ "
-            "(un triángulo para $d=2$) mediante operaciones de reflexión, expansión y contracción. "
-            "Implementamos un callback para registrar el historial de posiciones del símplex a lo largo de las iteraciones."
+            "(un triángulo para $d=2$) mediante operaciones de reflexión, expansión y contracción.\n\n"
+            "Para conocer la formulación geométrica completa de Nelder-Mead y ejemplos mínimos reproducibles con SciPy, "
+            "consulta el [Apéndice Técnico: Optimización Libre de Derivadas con Nelder-Mead en SciPy](../../appendix/optimizacion_nelder_mead.md).\n\n"
+            "### Especificación de la Función a Implementar\n"
+            "- **Nombre**: `calibrar_sir(theta_init, t_obs, I_obs, dt_sim=0.10, S0=0.99, I0=0.01, track_history=True)`\n"
+            "- **Parámetros de entrada**:\n"
+            "  - `theta_init`: tupla o lista `[beta_0, gamma_0]` con el punto de partida del optimizador.\n"
+            "  - `t_obs, I_obs, dt_sim, S0, I0`: datos y configuración de simulación.\n"
+            "  - `track_history: bool = True`: si es `True`, registra la lista de posiciones del símplex mediante `callback`.\n"
+            "- **Salida esperada**: Un diccionario `dict[str, Any]` con las siguientes claves exactas:\n"
+            "  - `'theta_hat'`: arreglo `np.ndarray` con `[beta_hat, gamma_hat]`.\n"
+            "  - `'beta_hat'`: valor `float` de $\\hat{\\beta}$.\n"
+            "  - `'gamma_hat'`: valor `float` de $\\hat{\\gamma}$.\n"
+            "  - `'R0_hat'`: valor `float` de $\\hat{R}_0 = \\hat{\\beta} / \\hat{\\gamma}$.\n"
+            "  - `'loss_val'`: valor `float` de la pérdida en el óptimo encontrado (`res.fun`).\n"
+            "  - `'success'`: booleano `bool` que indica si la optimización convergió exitosamente.\n"
+            "  - `'iterations'`: entero `int` con el total de iteraciones (`res.nit`).\n"
+            "  - `'history'`: arreglo 2D `np.ndarray` de dimensiones $(K, 2)$ con los puntos recorridos."
         )
     })
 
@@ -347,24 +407,20 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
         )
     })
 
-    # Celda 12: Markdown - Visualización del Contorno y Descenso
+    # Celda 12: Markdown - Visualización del Descenso del Símplex
     cells.append({
         "type": "markdown",
         "source": (
-            "## 5. Visualización de la Superficie de Costo y Descenso del Símplex\n\n"
-            "Graficamos el mapa de curvas de nivel de $L(\\beta, \\gamma)$ evaluado en $\\Delta t = 0.10$, "
-            "superponiendo la trayectoria seguida por el símplex de Nelder-Mead desde el punto inicial "
-            "$\\theta_0 = (0.20, 0.20)$ hasta el óptimo estimado, comparado con el valor verdadero continuo."
+            "## 5. Visualización del Descenso del Símplex sobre el Paisaje de Costo\n\n"
+            "Superponemos la trayectoria completa seguida por el símplex de Nelder-Mead desde el punto inicial "
+            "$\\theta_0 = (0.20, 0.20)$ hasta el óptimo estimado, contrastada con el valor verdadero continuo $\\theta^* = (0.40, 0.10)$."
         )
     })
 
-    # Celda 13: Código - Generación de gráfico de contorno y trayectoria
+    # Celda 13: Código - Gráfico de descenso del símplex
     cells.append({
         "type": "code",
         "source": (
-            "b_grid = np.linspace(0.20, 0.60, 45)\n"
-            "g_grid = np.linspace(0.04, 0.20, 45)\n"
-            "L_map = evaluar_malla_perdida(b_grid, g_grid, t_obs, I_obs, dt_sim=0.10)\n\n"
             "calib_init = calibrar_sir([0.20, 0.20], t_obs, I_obs, dt_sim=0.10, track_history=True)\n"
             "hist = calib_init[\"history\"]\n\n"
             "fig, ax = plt.subplots(figsize=(8, 6))\n"
@@ -376,9 +432,9 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "# Graficar trayectoria del símplex\n"
             "ax.plot(hist[:, 0], hist[:, 1], 'w.-', linewidth=1.5, markersize=5, label=\"Trayectoria Símplex Nelder-Mead\", zorder=3)\n"
             "ax.scatter([0.20], [0.20], color=\"#ff7f0e\", s=90, marker=\"s\", edgecolor=\"black\", label=\"Inicio: theta_0 = (0.20, 0.20)\", zorder=4)\n"
-            "ax.scatter([0.40], [0.10], color=\"#2ca02c\", s=120, marker=\"*\", edgecolor=\"black\", label=\"Verdad de Campo: theta* = (0.40, 0.10)\", zorder=4)\n"
+            "ax.scatter([0.40], [0.10], color=\"#2ca02c\", s=130, marker=\"*\", edgecolor=\"black\", label=\"Verdad de Campo: theta* = (0.40, 0.10)\", zorder=4)\n"
             "ax.scatter([calib_init['beta_hat']], [calib_init['gamma_hat']], color=\"#d62728\", s=90, marker=\"X\", edgecolor=\"black\", label=f\"Estimado (dt=0.10): ({calib_init['beta_hat']:.3f}, {calib_init['gamma_hat']:.3f})\", zorder=4)\n\n"
-            "ax.set_title(\"Paisaje de Pérdida y Calibración Nelder-Mead\")\n"
+            "ax.set_title(\"Descenso del Símplex de Nelder-Mead sobre el Paisaje de Pérdida\")\n"
             "ax.set_xlabel(\"Tasa de transmisión beta\")\n"
             "ax.set_ylabel(\"Tasa de recuperación gamma\")\n"
             "ax.legend(frameon=True, loc=\"upper left\", fontsize=9)\n"
@@ -396,7 +452,18 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "Evaluamos la calibración para una colección sistemática de pasos:\n\n"
             "$$\\Delta t \\in [0.05, 0.10, 0.25, 0.50, 0.80, 1.00, 1.50]$$\n\n"
             "Para cada $\\Delta t$, registramos los estimadores $\\hat{\\beta}(\\Delta t)$, $\\hat{\\gamma}(\\Delta t)$ "
-            "y el número reproductivo básico resultante $\\hat{R}_0(\\Delta t) = \\hat{\\beta}(\\Delta t) / \\hat{\\gamma}(\\Delta t)$."
+            "y el número reproductivo básico resultante $\\hat{R}_0(\\Delta t) = \\hat{\\beta}(\\Delta t) / \\hat{\\gamma}(\\Delta t)$.\n\n"
+            "### Especificación de la Función a Implementar\n"
+            "- **Nombre**: `experimento_sesgo_discretizacion(dt_valores, t_obs, I_obs, theta_init=(0.2, 0.2), S0=0.99, I0=0.01)`\n"
+            "- **Parámetros de entrada**:\n"
+            "  - `dt_valores`: lista o arreglo de valores de paso temporal $\\Delta t$.\n"
+            "  - `t_obs, I_obs, theta_init, S0, I0`: datos observados y punto de partida para cada optimización.\n"
+            "- **Salida esperada**: Un diccionario `dict[str, np.ndarray]` con arreglos 1D de NumPy para las siguientes claves:\n"
+            "  - `'dt'`: pasos temporales evaluados.\n"
+            "  - `'beta_hat'`: estimaciones $\\hat{\\beta}$.\n"
+            "  - `'gamma_hat'`: estimaciones $\\hat{\\gamma}$.\n"
+            "  - `'R0_hat'`: estimaciones $\\hat{R}_0$.\n"
+            "  - `'loss'`: valor óptimo de pérdida alcanzado."
         )
     })
 
@@ -506,16 +573,15 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
         )
     })
 
-    # Celda 18: Markdown - Reflexiones de Salud Pública
+    # Celda 18: Markdown - Reflexiones de Salud Pública y Cierre Metodológico
     cells.append({
         "type": "markdown",
         "source": (
-            "## 7. Reflexiones para la Salud Pública y Toma de Decisiones\n\n"
-            "Los resultados computacionales obtenidos revelan una tendencia inequívoca:\n"
-            "- A medida que el paso temporal $\\Delta t$ aumenta de $0.05$ a $1.50$ días, el optimizador eleva "
-            "sistemáticamente $\\hat{\\beta}$ de $0.4018$ a $0.4918$, inflando $\\hat{R}_0$ de $4.06$ a $4.77$ "
-            "(un error relativo del $+19.3\\%$ atribuible únicamente a la malla numérica).\n\n"
+            "## 7. Reflexiones para la Salud Pública y Cierre Metodológico del Taller\n\n"
             "### Impacto Sanitario: Cálculo del Umbral de Inmunidad Colectiva\n\n"
+            "Los resultados computacionales revelan que al aumentar el paso temporal $\\Delta t$ de $0.05$ a $1.50$ días, "
+            "el optimizador eleva sistemáticamente $\\hat{\\beta}$ de $0.4018$ a $0.4918$, inflando $\\hat{R}_0$ de $4.06$ a $4.77$ "
+            "(un error relativo del $+19.3\\%$ atribuible únicamente a la malla numérica).\n\n"
             "En epidemiología teórica, la proporción crítica de la población que debe ser inmunizada mediante vacunación "
             "para extinguir la transmisión comunitaria (inmunidad de rebaño) se calcula como:\n\n"
             "$$p_c = 1 - \\frac{1}{R_0}$$\n\n"
@@ -527,11 +593,14 @@ def build_nb4_cells(is_solution: bool) -> List[Dict[str, Any]]:
             "Una discrepancia de $4.0\\%$ en una población nacional de 5 millones de habitantes representa **200,000 personas "
             "adicionales que el Ministerio de Salud planificaría vacunar innecesariamente**, o por el contrario, la imposición "
             "de cuarentenas más prolongadas basadas en una velocidad de contagio artificialmente sobreestimada.\n\n"
-            "### Conclusión Metodológica\n\n"
-            "El error numérico de discretización no es simplemente un detalle de implementación computacional; "
-            "es un factor que distorsiona las inferencias científicas y tiene consecuencias directas y tangibles "
-            "en las políticas de salud pública. Para obtener estimadores no sesgados, es indispensable utilizar pasos "
-            "temporales suficientemente finos o integradores adaptativos de orden superior durante la calibración inversa."
+            "El error numérico de discretización no es un detalle secundario de cómputo; distorsiona las inferencias "
+            "científicas y tiene consecuencias directas y tangibles en las decisiones de salud pública.\n\n"
+            "### Cierre Metodológico del Taller\n\n"
+            "A lo largo de estos cuatro laboratorios, hemos recorrido la cadena completa de modelamiento matemático computacional:\n"
+            "1. **Discretización de EDOs**: Aprendimos a formular e implementar esquemas explícitos, implícitos e IMEX, identificando que el balance de masa físico y las cotas de estabilidad del paso temporal $\\Delta t$ determinan la viabilidad de una simulación.\n"
+            "2. **Resolución de Sistemas No Lineales**: Vimos cómo los métodos implícitos conducen a problemas de búsqueda de raíces y cómo resolverlos eficientemente con herramientas científicas (`scipy.optimize.root`).\n"
+            "3. **Incertidumbre y Modelamiento Directo**: Construimos un laboratorio *in silico*, muestreamos a tiempos de reporte clínico y caracterizamos estadísticamente el ruido instrumental mediante residuos observacionales.\n"
+            "4. **Minimización de Funciones y Problemas Inversos**: Formulamos la función de pérdida por mínimos cuadrados y calibramos parámetros epidemiológicos mediante optimización libre de derivadas (`scipy.optimize.minimize` con Nelder-Mead), descubriendo que la malla de discretización temporal puede inducir sesgos sistemáticos capaces de distorsionar decisiones críticas en políticas públicas."
         )
     })
 
